@@ -3,6 +3,9 @@ import { supabase } from '@/lib/supabase';
 import { prisma } from '@/lib/prisma';
 import { LoginRequest } from '@/types/auth';
 
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
+
 // POST /api/auth - Login
 export async function POST(request: NextRequest) {
   try {

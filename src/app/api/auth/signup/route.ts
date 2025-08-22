@@ -3,6 +3,9 @@ import { supabase } from '@/lib/supabase';
 import { prisma } from '@/lib/prisma';
 import { SignupRequest } from '@/types/auth';
 
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
+
 interface OAuthSignupRequest {
   username: string;
   email: string;

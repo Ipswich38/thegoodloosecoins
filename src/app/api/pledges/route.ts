@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createClient } from '@/lib/supabase';
+// Force this route to be dynamic
+export const dynamic = 'force-dynamic';
 import { prisma } from '@/lib/prisma';
 import { 
   CreatePledgeRequest, 
