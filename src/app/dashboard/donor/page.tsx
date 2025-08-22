@@ -121,11 +121,14 @@ export default function DonorDashboard() {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center">
               <div className="p-2 bg-green-100 rounded-lg">
-                <Heart className="h-6 w-6 text-green-600" />
+                <TrendingUp className="h-6 w-6 text-green-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Active Pledges</p>
-                <p className="text-2xl font-bold text-gray-900">{stats?.activePledges || 0}</p>
+                <p className="text-sm font-medium text-gray-600">Amount Sent</p>
+                <p className="text-2xl font-bold text-gray-900">${stats?.totalAmountSent?.toFixed(2) || '0.00'}</p>
+                <p className="text-xs text-gray-500">
+                  {stats?.totalPledged ? `${((stats.totalAmountSent || 0) / stats.totalPledged * 100).toFixed(1)}% of pledged` : '0% of pledged'}
+                </p>
               </div>
             </div>
           </div>
@@ -145,11 +148,14 @@ export default function DonorDashboard() {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center">
               <div className="p-2 bg-yellow-100 rounded-lg">
-                <TrendingUp className="h-6 w-6 text-yellow-600" />
+                <Heart className="h-6 w-6 text-yellow-600" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Impact Points</p>
                 <p className="text-2xl font-bold text-gray-900">{stats?.totalPoints.toLocaleString() || '0'}</p>
+                <p className="text-xs text-gray-500">
+                  Avg completion: {stats?.averageCompletion?.toFixed(1) || '0'}%
+                </p>
               </div>
             </div>
           </div>

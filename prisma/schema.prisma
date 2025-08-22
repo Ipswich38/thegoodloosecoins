@@ -38,12 +38,14 @@ model User {
 }
 
 model Pledge {
-  id        String        @id @default(cuid())
-  donorId   String        @map("donor_id")
-  amount    Float
-  status    PledgeStatus  @default(PENDING)
-  createdAt DateTime      @default(now()) @map("created_at")
-  updatedAt DateTime      @updatedAt @map("updated_at")
+  id                    String        @id @default(cuid())
+  donorId               String        @map("donor_id")
+  amount                Float
+  amountSent            Float?        @default(0) @map("amount_sent")
+  completionPercentage  Float?        @default(0) @map("completion_percentage")
+  status                PledgeStatus  @default(PENDING)
+  createdAt             DateTime      @default(now()) @map("created_at")
+  updatedAt             DateTime      @updatedAt @map("updated_at")
   
   // Relations
   donor     User          @relation("DonorPledges", fields: [donorId], references: [id], onDelete: Cascade)

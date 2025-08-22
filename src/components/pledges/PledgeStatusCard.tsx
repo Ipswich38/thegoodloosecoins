@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { CheckCircle, Clock, AlertCircle, Camera, Upload, Star } from 'lucide-react';
+import { CheckCircle, Clock, AlertCircle, Camera, Upload, Star, DollarSign } from 'lucide-react';
 import { PledgeWithTasks, PledgeTask, UpdatePledgeRequest } from '@/types/pledge';
 import { formatCurrency } from '@/lib/coins';
+import AmountSentForm from './AmountSentForm';
 
 interface PledgeStatusCardProps {
   pledge: PledgeWithTasks;
@@ -22,6 +23,7 @@ export default function PledgeStatusCard({
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
   const [taskEvidence, setTaskEvidence] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [showAmountSentForm, setShowAmountSentForm] = useState(false);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -135,9 +137,31 @@ export default function PledgeStatusCard({
             <p className="text-sm text-gray-500">
               Created {new Date(pledge.createdAt).toLocaleDateString()}
             </p>
+            {(pledge as any).amountSent !== undefined && (
+              <div className="mt-2 text-sm">
+                <span className="text-gray-600">Amount Sent: </span>
+                <span className="font-semibold text-green-600">
+                  {formatCurrency((pledge as any).amountSent || 0)}
+                </span>
+                <span className="text-gray-500 ml-2">
+                  ({(((pledge as any).amountSent || 0) / pledge.amount * 100).toFixed(1)}%)
+                </span>
+              </div>
+            )}
           </div>
-          <div className={`px-3 py-1 rounded-full border text-sm font-medium ${getStatusColor(pledge.status)}`}>
-            {getStatusText(pledge.status)}
+          <div className="flex items-center space-x-2">
+            <div className={`px-3 py-1 rounded-full border text-sm font-medium ${getStatusColor(pledge.status)}`}>
+              {getStatusText(pledge.status)}
+            </div>
+            {!showAmountSentForm && (pledge as any).amountSent !== undefined && (
+              <button
+                onClick={() => setShowAmountSentForm(true)}
+                className="p-2 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                title="Update amount sent"
+              >
+                <DollarSign className="h-4 w-4" />
+              </button>
+            )}
           </div>
         </div>
 
@@ -272,6 +296,24 @@ export default function PledgeStatusCard({
                 )}
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Amount Sent Form */}
+        {showAmountSentForm && (
+          <div className="mt-6">
+            <AmountSentForm
+              pledgeId={pledge.id}
+              pledgeAmount={pledge.amount}
+              currentAmountSent={(pledge as any).amountSent || 0}
+              onSuccess={() => {
+                setShowAmountSentForm(false);
+                if (onUpdate) {
+                  onUpdate(pledge);
+                }
+              }}
+              onCancel={() => setShowAmountSentForm(false)}
+            />
           </div>
         )}
 

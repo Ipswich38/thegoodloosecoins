@@ -18,7 +18,11 @@ async function getDonorStats(userId: string): Promise<PledgeStats> {
   // Get pledge statistics
   const pledgeStats = await prisma.pledge.aggregate({
     where: { donorId: userId },
-    _sum: { amount: true },
+    _sum: { 
+      amount: true,
+      amountSent: true,
+      completionPercentage: true
+    },
     _count: {
       id: true,
       _all: true,
@@ -54,12 +58,20 @@ async function getDonorStats(userId: string): Promise<PledgeStats> {
     }
   });
 
+  // Calculate average completion percentage
+  const totalPledges = pledgeStats._count.id;
+  const averageCompletion = totalPledges > 0 
+    ? (pledgeStats._sum.completionPercentage || 0) / totalPledges 
+    : 0;
+
   return {
     totalPledged: pledgeStats._sum.amount || 0,
+    totalAmountSent: pledgeStats._sum.amountSent || 0,
     activePledges: activePledgesCount,
     completedPledges: completedPledgesCount,
     totalPoints: socialImpactPoints?.points || 0,
     peopleHelped: peopleHelped.length,
+    averageCompletion: averageCompletion,
   };
 }
 
@@ -72,17 +84,34 @@ async function getDoneeStats(userId: string): Promise<DoneeStats> {
     }
   });
 
-  // Calculate available funds (completed donations)
+  // Calculate available funds based on actual amount sent from completed pledges
   const availableFunds = donations
     .filter(d => d.pledge.status === 'COMPLETED')
-    .reduce((sum, d) => sum + d.amount, 0);
+    .reduce((sum, d) => {
+      // Use the actual amount sent for this donation's share
+      const pledgeAmountSent = d.pledge.amountSent || 0;
+      const donationShare = d.amount / d.pledge.amount; // This donation's share of the pledge
+      return sum + (pledgeAmountSent * donationShare);
+    }, 0);
 
-  // Calculate pending rewards (donations from non-completed pledges)
+  // Calculate pending rewards from pledges that have amounts sent but not completed
   const pendingRewards = donations
-    .filter(d => d.pledge.status !== 'COMPLETED')
-    .reduce((sum, d) => sum + d.amount, 0);
+    .filter(d => d.pledge.status !== 'COMPLETED' && (d.pledge.amountSent || 0) > 0)
+    .reduce((sum, d) => {
+      const pledgeAmountSent = d.pledge.amountSent || 0;
+      const donationShare = d.amount / d.pledge.amount;
+      return sum + (pledgeAmountSent * donationShare);
+    }, 0);
 
-  const totalEarned = donations.reduce((sum, d) => sum + d.amount, 0);
+  // Total potential earnings (based on full donation amounts)
+  const totalPotentialEarned = donations.reduce((sum, d) => sum + d.amount, 0);
+
+  // Total actually earned (based on amount sent)
+  const totalEarned = donations.reduce((sum, d) => {
+    const pledgeAmountSent = d.pledge.amountSent || 0;
+    const donationShare = d.amount / d.pledge.amount;
+    return sum + (pledgeAmountSent * donationShare);
+  }, 0);
 
   // Active tasks are pledges that have donations for this user but aren't completed
   const activeTasks = donations.filter(d => 

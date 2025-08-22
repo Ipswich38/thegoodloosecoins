@@ -4,6 +4,8 @@ export interface Pledge {
   id: string;
   donorId: string;
   amount: number;
+  amountSent?: number | null;
+  completionPercentage?: number | null;
   status: PledgeStatus;
   createdAt: string;
   updatedAt: string;
@@ -106,10 +108,12 @@ export interface CoinCount {
 
 export interface PledgeStats {
   totalPledged: number;
+  totalAmountSent: number;
   activePledges: number;
   completedPledges: number;
   totalPoints: number;
   peopleHelped: number;
+  averageCompletion: number;
 }
 
 export interface DoneeStats {

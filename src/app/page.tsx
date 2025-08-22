@@ -1,3 +1,6 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
   Coins, 
@@ -12,12 +15,76 @@ import {
   Award
 } from 'lucide-react';
 
+interface GlobalStats {
+  totalUsers: number;
+  totalDonors: number;
+  totalDonees: number;
+  totalPledges: number;
+  totalAmountPledged: number;
+  totalAmountSent: number;
+  completedPledges: number;
+  activeDonorsCount: number;
+  peopleHelpedCount: number;
+  totalImpactPoints: number;
+  averagePledgeAmount: number;
+  completionRate: number;
+  coinsBackInCirculation: number;
+}
+
 export default function Home() {
-  const stats = [
-    { label: 'Total Donations', value: '1,250+', icon: Heart },
-    { label: 'People Helped', value: '340+', icon: Users },
-    { label: 'Active Donors', value: '850+', icon: Star },
-    { label: 'Impact Points', value: '25,000+', icon: Award }
+  const [stats, setStats] = useState<GlobalStats | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchGlobalStats();
+    
+    // Refresh stats every 30 seconds when page is visible
+    const interval = setInterval(() => {
+      if (!document.hidden) {
+        fetchGlobalStats();
+      }
+    }, 30000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  const fetchGlobalStats = async () => {
+    try {
+      const response = await fetch('/api/stats');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setStats(data.data);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching global stats:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const displayStats = [
+    { 
+      label: 'Total Pledged', 
+      value: isLoading ? '...' : `$${stats?.totalAmountPledged?.toFixed(2) || '0.00'}`, 
+      icon: Heart 
+    },
+    { 
+      label: 'People Helped', 
+      value: isLoading ? '...' : `${stats?.peopleHelpedCount?.toLocaleString() || '0'}+`, 
+      icon: Users 
+    },
+    { 
+      label: 'Active Donors', 
+      value: isLoading ? '...' : `${stats?.activeDonorsCount?.toLocaleString() || '0'}+`, 
+      icon: Star 
+    },
+    { 
+      label: 'Impact Points', 
+      value: isLoading ? '...' : `${stats?.totalImpactPoints?.toLocaleString() || '0'}+`, 
+      icon: Award 
+    }
   ];
 
   const steps = [
@@ -81,7 +148,7 @@ export default function Home() {
       <section className="py-16 bg-white px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
+            {displayStats.map((stat, index) => (
               <div key={index} className="text-center">
                 <div className="flex justify-center mb-4">
                   <div className="bg-primary-100 p-3 rounded-full">
