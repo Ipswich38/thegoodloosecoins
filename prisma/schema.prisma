@@ -1,0 +1,81 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserType {
+  DONOR
+  DONEE
+}
+
+enum PledgeStatus {
+  PENDING
+  TASK1_COMPLETE
+  TASK2_COMPLETE
+  COMPLETED
+}
+
+model User {
+  id          String    @id @default(cuid())
+  username    String    @unique
+  email       String?   @unique
+  type        UserType
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  
+  // Relations
+  pledges     Pledge[]  @relation("DonorPledges")
+  donations   Donation[]
+
+  @@map("users")
+}
+
+model Pledge {
+  id        String        @id @default(cuid())
+  donorId   String        @map("donor_id")
+  amount    Float
+  status    PledgeStatus  @default(PENDING)
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
+  
+  // Relations
+  donor     User          @relation("DonorPledges", fields: [donorId], references: [id], onDelete: Cascade)
+  donations Donation[]
+
+  @@map("pledges")
+}
+
+model Donation {
+  id            String    @id @default(cuid())
+  pledgeId      String    @map("pledge_id")
+  beneficiaryId String    @map("beneficiary_id")
+  amount        Float
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  
+  // Relations
+  pledge        Pledge    @relation(fields: [pledgeId], references: [id], onDelete: Cascade)
+  beneficiary   User      @relation(fields: [beneficiaryId], references: [id], onDelete: Cascade)
+
+  @@map("donations")
+}
+
+model SocialImpactPoint {
+  id     String @id @default(cuid())
+  userId String @map("user_id")
+  points Int    @default(0)
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId])
+  @@map("social_impact_points")
+}
