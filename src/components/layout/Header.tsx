@@ -2,13 +2,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { Coins, Menu, X, User, LogOut } from 'lucide-react';
-
-interface User {
-  id: string;
-  username: string;
-  type: 'DONOR' | 'DONEE';
-}
+import { Coins, Menu, X, User as UserIcon, LogOut } from 'lucide-react';
+import { User } from '@/types/auth';
 
 export default function Header() {
   const [user, setUser] = useState<User | null>(null);
@@ -87,7 +82,7 @@ export default function Header() {
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                   className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg transition-colors"
                 >
-                  <User className="h-4 w-4" />
+                  <UserIcon className="h-4 w-4" />
                   <span className="font-medium">{user.username}</span>
                 </button>
 
@@ -161,7 +156,7 @@ export default function Header() {
               {user ? (
                 <div className="space-y-2 pt-4 border-t border-gray-200">
                   <div className="flex items-center gap-2 text-gray-900 font-medium">
-                    <User className="h-4 w-4" />
+                    <UserIcon className="h-4 w-4" />
                     {user.username}
                   </div>
                   <Link
