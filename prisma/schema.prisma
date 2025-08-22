@@ -31,8 +31,9 @@ model User {
   updatedAt   DateTime  @updatedAt @map("updated_at")
   
   // Relations
-  pledges     Pledge[]  @relation("DonorPledges")
-  donations   Donation[]
+  pledges            Pledge[]            @relation("DonorPledges")
+  donations          Donation[]
+  socialImpactPoints SocialImpactPoint[] @relation("UserSocialImpactPoints")
 
   @@map("users")
 }
@@ -76,6 +77,9 @@ model SocialImpactPoint {
   
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation("UserSocialImpactPoints", fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId])
   @@map("social_impact_points")

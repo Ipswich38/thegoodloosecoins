@@ -51,7 +51,7 @@ export default function PledgesList({ userType, onPledgeUpdate, className = '' }
       const data: PledgesResponse = await response.json();
 
       if (!data.success) {
-        throw new Error(data.error?.message || 'Failed to fetch pledges');
+        throw new Error(data.error || 'Failed to fetch pledges');
       }
 
       setPledges(data.pledges || []);
@@ -68,7 +68,7 @@ export default function PledgesList({ userType, onPledgeUpdate, className = '' }
     fetchPledges();
   }, [filters, pagination]);
 
-  const handleFilterChange = (key: keyof PledgeFilters, value: any) => {
+  const handleFilterChange = (key: keyof PledgeFilters, value: unknown) => {
     setFilters(prev => ({
       ...prev,
       [key]: value || undefined,
@@ -79,13 +79,13 @@ export default function PledgesList({ userType, onPledgeUpdate, className = '' }
   const handleSortChange = (sortBy: string) => {
     setPagination(prev => ({
       ...prev,
-      sortBy: sortBy as any,
+      sortBy: sortBy as 'createdAt' | 'amount' | 'status',
       sortOrder: prev.sortBy === sortBy && prev.sortOrder === 'desc' ? 'asc' : 'desc',
       page: 1,
     }));
   };
 
-  const handlePledgeUpdate = async (updatedPledge: any) => {
+  const handlePledgeUpdate = async (updatedPledge: Pledge) => {
     // Update the pledge in the local state
     setPledges(prev => 
       prev.map(p => p.id === updatedPledge.id ? updatedPledge : p)

@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
     const socialImpactData = await prisma.socialImpactPoint.findMany({
       where: {
         points: { gt: 0 },
-        ...(timeframe !== 'all' ? { updatedAt: dateFilter.createdAt } : {})
+        ...(timeframe !== 'all' ? { updatedAt: (dateFilter as any).createdAt } : {})
       },
       include: {
         user: {

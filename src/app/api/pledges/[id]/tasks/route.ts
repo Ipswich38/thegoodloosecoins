@@ -107,7 +107,7 @@ function calculatePoints(pledge: any): { totalPoints: number, earnedPoints: numb
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = createClient();
@@ -120,7 +120,8 @@ export async function GET(
       );
     }
 
-    const pledgeId = params.id;
+    const { id } = await params;
+    const pledgeId = id;
 
     const pledge = await prisma.pledge.findUnique({
       where: { id: pledgeId },

@@ -15,7 +15,7 @@ async function getCurrentUser(supabase: any) {
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = createClient();
@@ -30,7 +30,8 @@ export async function POST(
 
     const body = await request.json();
     const { amountSent } = body;
-    const pledgeId = params.id;
+    const { id } = await params;
+    const pledgeId = id;
 
     // Validate amount
     if (typeof amountSent !== 'number' || amountSent <= 0) {
