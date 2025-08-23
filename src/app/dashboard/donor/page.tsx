@@ -52,28 +52,16 @@ export default function DonorDashboard() {
   };
 
   const checkAuthStatus = async () => {
-    console.log('🔐 DONOR DASHBOARD - Checking authentication status...');
+    console.log('🔐 NEW CLEAN DONOR DASHBOARD - Checking authentication...');
     
     try {
-      // First try the new direct session check
-      console.log('📡 Trying /api/auth/check-session...');
-      let response = await fetch('/api/auth/check-session');
+      console.log('📡 Checking /api/auth/me with new clean system...');
+      const response = await fetch('/api/auth/me');
       
-      console.log('📋 Check-session response:', {
+      console.log('📋 Auth response:', {
         status: response.status,
-        ok: response.ok,
-        url: response.url
+        ok: response.ok
       });
-      
-      if (!response.ok) {
-        console.log('📡 Check-session failed, trying /api/auth/me...');
-        // Fallback to the original auth/me endpoint
-        response = await fetch('/api/auth/me');
-        console.log('📋 Auth/me response:', {
-          status: response.status,
-          ok: response.ok
-        });
-      }
       
       if (response.ok) {
         const data = await response.json();

@@ -4,12 +4,11 @@ import type { NextRequest } from 'next/server';
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // EMERGENCY BLOCK: Redirect verify-otp requests immediately
+  // BLOCK: No OTP routes exist in the new system
   if (pathname.startsWith('/verify-otp')) {
-    console.log('🚫 MIDDLEWARE BLOCKING VERIFY-OTP ACCESS - REDIRECTING TO SIGNUP');
+    console.log('🚫 VERIFY-OTP ROUTE DOES NOT EXIST - REDIRECTING TO SIGNUP');
     const url = request.nextUrl.clone();
     url.pathname = '/signup';
-    url.search = '?message=Email+verification+is+disabled';
     return NextResponse.redirect(url);
   }
 
@@ -32,13 +31,12 @@ export async function middleware(request: NextRequest) {
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
   const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
 
-  // Get auth tokens from cookies (support both Supabase and direct session)
-  const accessToken = request.cookies.get('sb-access-token')?.value;
-  const directSession = request.cookies.get('app-session')?.value;
+  // Get auth tokens from new clean session system
+  const sessionToken = request.cookies.get('session-token')?.value;
   const userId = request.cookies.get('user-id')?.value;
 
-  // Simple authentication check - check if any valid tokens exist
-  const isAuthenticated = !!(accessToken || (directSession && userId));
+  // Simple authentication check
+  const isAuthenticated = !!(sessionToken && userId);
 
   // Redirect logic
   if (isProtectedRoute && !isAuthenticated) {
