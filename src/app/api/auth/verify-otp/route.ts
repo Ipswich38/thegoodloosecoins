@@ -58,28 +58,27 @@ export async function POST(request: NextRequest) {
     if (userData) {
       const { username, type, password } = userData;
       
-      // First create the user in Supabase Auth if they don't exist
-      let authUser = data.user;
-      if (!authUser || !authUser.email_confirmed_at) {
-        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              username,
-              user_type: type,
-            },
+      // OTP was verified, now create the user account with password
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            username,
+            user_type: type,
           },
-        });
+          emailRedirectTo: undefined, // No redirect needed since we're already verified
+        },
+      });
 
-        if (signUpError || !signUpData.user) {
-          return NextResponse.json(
-            { success: false, error: 'Failed to create user account' },
-            { status: 400 }
-          );
-        }
-        authUser = signUpData.user;
+      if (signUpError || !signUpData.user) {
+        return NextResponse.json(
+          { success: false, error: signUpError?.message || 'Failed to create user account' },
+          { status: 400 }
+        );
       }
+
+      const authUser = signUpData.user;
       
       // Create user in our database
       try {
