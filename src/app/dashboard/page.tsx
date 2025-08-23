@@ -11,38 +11,61 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const redirectToUserDashboard = async () => {
+      console.log('🏠 MAIN DASHBOARD - Checking authentication and redirecting...');
+      
       try {
         // Try direct session check first, then fallback to Supabase auth
+        console.log('📡 Trying /api/auth/check-session...');
         let response = await fetch('/api/auth/check-session', {
           method: 'GET',
           credentials: 'include',
         });
         
+        console.log('📋 Check-session response:', {
+          status: response.status,
+          ok: response.ok
+        });
+        
         if (!response.ok) {
+          console.log('📡 Check-session failed, trying /api/auth/me...');
           response = await fetch('/api/auth/me', {
             method: 'GET',
             credentials: 'include',
           });
+          
+          console.log('📋 Auth/me response:', {
+            status: response.status,
+            ok: response.ok
+          });
         }
 
         if (!response.ok) {
+          console.log('❌ Both auth endpoints failed - redirecting to login');
+          console.log('🔄 Redirecting with message: Please log in to access your dashboard.');
           // User is not authenticated, redirect to login
           router.push('/login?message=' + encodeURIComponent('Please log in to access your dashboard.'));
           return;
         }
 
         const data = await response.json();
+        console.log('✅ Auth successful:', {
+          success: data.success,
+          hasUser: !!data.user,
+          userType: data.user?.type
+        });
 
         if (data.success && data.user) {
           // Redirect to appropriate dashboard based on user type
           const userType = data.user.type.toLowerCase();
+          console.log(`🎯 Redirecting to dashboard/${userType}`);
           router.push(`/dashboard/${userType}`);
         } else {
+          console.log('❌ No user data in successful response - redirecting to login');
           // User data not available, redirect to login
           router.push('/login?message=' + encodeURIComponent('Please log in to access your dashboard.'));
         }
       } catch (error) {
-        console.error('Error fetching user data:', error);
+        console.error('🚨 Error fetching user data:', error);
         setError('Unable to load dashboard. Please try again.');
         setIsLoading(false);
       }

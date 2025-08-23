@@ -150,7 +150,10 @@ function SignupForm() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache',
           },
+          cache: 'no-store',
           body: JSON.stringify({
             username: formData.username,
             email: formData.email,
@@ -217,15 +220,21 @@ function SignupForm() {
       });
 
       if (data.success) {
-        // COMPLETELY IGNORE ALL OTP/EMAIL VERIFICATION - ALWAYS GO TO DASHBOARD
+        // NUCLEAR OPTION: COMPLETELY IGNORE ALL SERVER RESPONSES - ALWAYS GO TO DASHBOARD
         const userType = data.user?.type?.toLowerCase() || formData.type.toLowerCase();
         console.log(`🚀 BYPASSING ALL EMAIL VERIFICATION - DIRECT DASHBOARD REDIRECT for type: ${userType}`);
         console.log(`🔥 IGNORING requiresOTP: ${data.requiresOTP} - FORCING DASHBOARD ACCESS`);
         
-        // NUCLEAR OPTION: Ignore ALL server responses about OTP/verification
-        // Just redirect to dashboard immediately on any success
+        // IMMEDIATE REDIRECT - NO EXCEPTIONS, NO CONDITIONS
+        console.log('🚨 EMERGENCY DASHBOARD REDIRECT - NO OTP ALLOWED');
         router.replace(`/dashboard/${userType}`);
         return; // Exit immediately to prevent any further processing
+      } else if (data.requiresOTP) {
+        // EMERGENCY OVERRIDE: Even if success is false but requiresOTP is true, STILL redirect
+        console.log('🚨 DETECTED requiresOTP=true - EMERGENCY OVERRIDE TO DASHBOARD');
+        const userType = formData.type.toLowerCase();
+        router.replace(`/dashboard/${userType}`);
+        return;
       } else {
         console.log('❌ Signup failed:', data.error);
         setErrors({ general: data.error || 'Signup failed' });

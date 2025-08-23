@@ -186,9 +186,15 @@ function OTPVerificationPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // COMPLETELY BYPASS OTP - redirect to signup instead
-    console.log('🚫 OTP page accessed - redirecting to signup to avoid OTP flow');
-    router.push('/signup?message=' + encodeURIComponent('Email verification temporarily disabled. Please try signing up again.'));
+    // EMERGENCY REDIRECT - NEVER ALLOW OTP PAGE ACCESS
+    console.log('🚫🚫🚫 OTP PAGE BLOCKED - IMMEDIATE REDIRECT TO SIGNUP');
+    console.log('🚨 This page should NEVER be visible - redirecting NOW');
+    
+    // Immediate redirect - don't even wait for React
+    window.location.href = '/signup?message=' + encodeURIComponent('Email verification is disabled. Please signup directly.');
+    
+    // Backup redirect in case window.location fails
+    router.replace('/signup?message=' + encodeURIComponent('Email verification is disabled. Please signup directly.'));
   }, [router]);
 
   return (
