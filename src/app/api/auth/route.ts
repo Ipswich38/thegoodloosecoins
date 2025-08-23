@@ -14,20 +14,49 @@ export async function POST(request: NextRequest) {
 
     if (!email || !password) {
       return NextResponse.json(
-        { success: false, error: 'Email and password are required' },
+        { success: false, error: 'Email/username and password are required' },
         { status: 400 }
       );
     }
 
-    // Authenticate with Supabase
+    // Determine if input is email or username
+    const isEmail = email.includes('@');
+    let actualEmail = email;
+
+    // If username is provided, find the corresponding email
+    if (!isEmail) {
+      try {
+        const userRecord = await prisma.user.findUnique({
+          where: { username: email },
+          select: { email: true },
+        });
+
+        if (!userRecord || !userRecord.email) {
+          return NextResponse.json(
+            { success: false, error: 'Invalid username or password' },
+            { status: 401 }
+          );
+        }
+
+        actualEmail = userRecord.email;
+      } catch (dbError) {
+        console.error('Database error during username lookup:', dbError);
+        return NextResponse.json(
+          { success: false, error: 'Authentication service temporarily unavailable' },
+          { status: 503 }
+        );
+      }
+    }
+
+    // Authenticate with Supabase using the email
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-      email,
+      email: actualEmail,
       password,
     });
 
     if (authError) {
       return NextResponse.json(
-        { success: false, error: authError.message },
+        { success: false, error: isEmail ? authError.message : 'Invalid username or password' },
         { status: 401 }
       );
     }
@@ -40,23 +69,42 @@ export async function POST(request: NextRequest) {
     }
 
     // Get user data from our database
-    const user = await prisma.user.findUnique({
-      where: { email: authData.user.email },
-      select: {
-        id: true,
-        username: true,
-        email: true,
-        type: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
+    let user;
+    try {
+      user = await prisma.user.findUnique({
+        where: { email: actualEmail },
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          type: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
 
-    if (!user) {
-      return NextResponse.json(
-        { success: false, error: 'User not found in database' },
-        { status: 404 }
-      );
+      if (!user) {
+        // Create fallback user object if database is unavailable
+        user = {
+          id: authData.user.id,
+          username: authData.user.user_metadata?.username || 'user',
+          email: actualEmail,
+          type: (authData.user.user_metadata?.user_type || 'DONOR') as 'DONOR' | 'DONEE',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+      }
+    } catch (dbError) {
+      console.error('Database error during user lookup:', dbError);
+      // Create fallback user object
+      user = {
+        id: authData.user.id,
+        username: authData.user.user_metadata?.username || 'user',
+        email: actualEmail,
+        type: (authData.user.user_metadata?.user_type || 'DONOR') as 'DONOR' | 'DONEE',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
     }
 
     // Create response with session cookie

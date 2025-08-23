@@ -152,22 +152,22 @@ function LoginForm() {
           )}
 
           <div className="space-y-4">
-            {/* Email */}
+            {/* Email or Username */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email address
+                Email or Username
               </label>
               <input
                 id="email"
                 name="email"
-                type="email"
-                autoComplete="email"
+                type="text"
+                autoComplete="username email"
                 value={formData.email}
                 onChange={handleInputChange}
                 className={`w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
                   errors.email ? 'border-red-300 bg-red-50' : 'border-gray-300'
                 }`}
-                placeholder="Enter your email"
+                placeholder="Enter your email or username"
               />
               {errors.email && (
                 <p className="mt-1 text-sm text-red-600">{errors.email}</p>

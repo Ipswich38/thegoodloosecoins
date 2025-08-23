@@ -160,11 +160,15 @@ function SignupForm() {
       const data = await response.json();
 
       if (data.success) {
-        if (data.user && data.message.includes('logged in')) {
-          // User was automatically logged in
+        if (data.requiresOTP) {
+          // OTP verification required - redirect to verification page
+          const userDataParam = encodeURIComponent(JSON.stringify(data.userData));
+          router.push(`/verify-otp?email=${encodeURIComponent(data.userData.email)}&userData=${userDataParam}`);
+        } else if (data.user && data.message.includes('logged in')) {
+          // User was automatically logged in (OAuth flow)
           router.push(`/dashboard/${data.user.type.toLowerCase()}`);
         } else {
-          // Email confirmation required
+          // Fallback - redirect to login
           router.push('/login?message=' + encodeURIComponent(data.message));
         }
       } else {

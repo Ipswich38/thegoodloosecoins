@@ -108,37 +108,42 @@ export async function POST(request: NextRequest) {
       authData = sessionData;
       userId = sessionData.user.id;
     } else {
-      // Create user in Supabase Auth for email/password
-      const signUpResult = await supabase.auth.signUp({
+      // Send OTP for email verification instead of creating user immediately
+      const { error: otpError } = await supabase.auth.signInWithOtp({
         email,
-        password: password!,
         options: {
+          shouldCreateUser: false, // Don't create user yet
           data: {
             username,
             user_type: type,
+            password: password!, // Store password temporarily in metadata
+            signup_flow: true,
           },
         },
       });
 
-      if (signUpResult.error) {
+      if (otpError) {
         return NextResponse.json(
-          { success: false, error: signUpResult.error.message },
+          { success: false, error: otpError.message },
           { status: 400 }
         );
       }
 
-      if (!signUpResult.data.user) {
-        return NextResponse.json(
-          { success: false, error: 'Failed to create user' },
-          { status: 500 }
-        );
-      }
-
-      authData = signUpResult.data;
-      userId = signUpResult.data.user.id;
+      // Return success with OTP sent message
+      return NextResponse.json({
+        success: true,
+        requiresOTP: true,
+        message: 'Please check your email for a 6-digit verification code to complete your registration.',
+        userData: {
+          username,
+          email,
+          type,
+          password: password!,
+        },
+      });
     }
 
-    // Create user in our database
+    // OAuth flow - create user in database immediately
     let user;
     try {
       user = await prisma.user.create({
@@ -159,7 +164,7 @@ export async function POST(request: NextRequest) {
       });
     } catch (dbError) {
       console.error('Database creation error:', dbError);
-      // For now, return a fallback user object
+      // For OAuth, return a fallback user object
       user = {
         id: userId,
         username,
@@ -170,7 +175,7 @@ export async function POST(request: NextRequest) {
       };
     }
 
-    // Handle session creation
+    // Handle session creation for OAuth
     const response = NextResponse.json({
       success: true,
       user: {
@@ -178,12 +183,10 @@ export async function POST(request: NextRequest) {
         createdAt: user.createdAt.toISOString(),
         updatedAt: user.updatedAt.toISOString(),
       },
-      message: authData.session 
-        ? 'Account created and logged in successfully'
-        : 'Account created successfully. Please check your email to confirm your account.',
+      message: 'Account created and logged in successfully',
     });
 
-    // Set session cookies if available
+    // Set session cookies
     if (authData.session) {
       response.cookies.set('sb-access-token', authData.session.access_token, {
         httpOnly: true,
@@ -202,10 +205,8 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Clear OAuth token if it was an OAuth flow
-    if (isOAuth) {
-      response.cookies.delete('sb-oauth-token');
-    }
+    // Clear OAuth token
+    response.cookies.delete('sb-oauth-token');
 
     return response;
   } catch (error) {
