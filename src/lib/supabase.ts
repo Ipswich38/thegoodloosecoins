@@ -1,11 +1,17 @@
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://wodsdkyipyiuqmhnsxkw.supabase.co';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvZHNka3lpcHlpdXFtaG5zeGt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU4NTM0MDAsImV4cCI6MjA3MTQyOTQwMH0.09aiG6Gq2ubEvgHU5qfrUSozhUxWd49c5bPon5iC4XQ';
+// Ensure environment variables are clean
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || 'https://wodsdkyipyiuqmhnsxkw.supabase.co';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim().replace(/[\s\n\r]/g, '') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvZHNka3lpcHlpdXFtaG5zeGt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU4NTM0MDAsImV4cCI6MjA3MTQyOTQwMH0.09aiG6Gq2ubEvgHU5qfrUSozhUxWd49c5bPon5iC4XQ';
+
+// Validate the anon key format
+if (!supabaseAnonKey.match(/^[A-Za-z0-9+/]*={0,2}$/) || supabaseAnonKey.split('.').length !== 3) {
+  console.error('Invalid Supabase anon key format');
+}
 
 export const supabase = createSupabaseClient(supabaseUrl, supabaseAnonKey);
 
-// Server-side client for API routes - simplified version for API routes
+// Server-side client for API routes
 export function createClient() {
   return createSupabaseClient(supabaseUrl, supabaseAnonKey);
 }
