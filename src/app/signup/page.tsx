@@ -458,10 +458,10 @@ function SignupForm() {
             {isLoading ? 'Creating Account...' : (isOAuthFlow ? 'Complete Setup' : 'Create Account')}
           </button>
 
-          {/* Google Signup (only for regular signup) */}
+          {/* Temporarily disabled Google OAuth */}
+          {/*
           {!isOAuthFlow && (
             <>
-              {/* Divider */}
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-gray-300" />
@@ -471,7 +471,6 @@ function SignupForm() {
                 </div>
               </div>
 
-              {/* Google Sign Up */}
               <button
                 type="button"
                 onClick={handleGoogleSignup}
@@ -504,6 +503,7 @@ function SignupForm() {
               </button>
             </>
           )}
+          */}
         </form>
 
         {/* Sign In Link */}

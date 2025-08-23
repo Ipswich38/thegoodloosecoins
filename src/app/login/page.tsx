@@ -220,7 +220,8 @@ function LoginForm() {
             {isLoading ? 'Signing In...' : 'Sign In'}
           </button>
 
-          {/* Divider */}
+          {/* Temporarily disabled Google OAuth */}
+          {/*
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-300" />
@@ -230,7 +231,6 @@ function LoginForm() {
             </div>
           </div>
 
-          {/* Google Sign In */}
           <button
             type="button"
             onClick={handleGoogleLogin}
@@ -261,6 +261,7 @@ function LoginForm() {
             )}
             {isGoogleLoading ? 'Connecting...' : 'Continue with Google'}
           </button>
+          */}
         </form>
 
         {/* Sign Up Link */}
