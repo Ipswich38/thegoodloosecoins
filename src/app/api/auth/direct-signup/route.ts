@@ -18,10 +18,11 @@ function generateUserId(): string {
 // Direct signup bypassing Supabase Auth entirely
 export async function POST(request: NextRequest) {
   try {
+    console.log('🚀 DIRECT SIGNUP ROUTE CALLED');
     const body: SignupRequest = await request.json();
     const { username, email, password, type } = body;
 
-    console.log('Direct signup attempt for:', email);
+    console.log('🎯 Direct signup attempt for:', email, 'type:', type);
 
     // Validate input
     if (!username || !email || !password || !type) {
@@ -98,9 +99,9 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      console.log('User created successfully:', userId);
+      console.log('✅ User created successfully in database:', userId, 'type:', user.type);
     } catch (dbError) {
-      console.error('Database creation error:', dbError);
+      console.error('❌ Database creation error:', dbError);
       return NextResponse.json(
         { success: false, error: 'Failed to create account' },
         { status: 500 }
@@ -111,7 +112,7 @@ export async function POST(request: NextRequest) {
     const sessionToken = randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-    const response = NextResponse.json({
+    const responseData = {
       success: true,
       user: {
         ...user,
@@ -119,7 +120,17 @@ export async function POST(request: NextRequest) {
         updatedAt: user.updatedAt.toISOString(),
       },
       message: 'Account created successfully! Welcome to The Good Loose Coins.',
+      // Explicitly prevent OTP redirect
+      requiresOTP: false,
+    };
+
+    console.log('🎉 Direct signup SUCCESS - returning:', {
+      success: responseData.success,
+      userType: responseData.user.type,
+      requiresOTP: responseData.requiresOTP,
     });
+
+    const response = NextResponse.json(responseData);
 
     // Set simple session cookie
     response.cookies.set('app-session', sessionToken, {

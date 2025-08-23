@@ -195,16 +195,15 @@ function SignupForm() {
       const data = await response.json();
 
       if (data.success) {
-        if (data.requiresOTP) {
-          // OTP verification required - redirect to verification page
-          const userDataParam = encodeURIComponent(JSON.stringify(data.userData));
-          router.push(`/verify-otp?email=${encodeURIComponent(data.userData.email)}&userData=${userDataParam}`);
-        } else if (data.user) {
-          // User was created successfully - redirect to dashboard
+        if (data.user) {
+          // User was created successfully - redirect to dashboard immediately
+          console.log('Signup successful, redirecting to dashboard for user type:', data.user.type);
           router.push(`/dashboard/${data.user.type.toLowerCase()}`);
         } else {
-          // Fallback - redirect to login
-          router.push('/login?message=' + encodeURIComponent(data.message || 'Account created successfully'));
+          // Force redirect to dashboard even if user object is missing - skip OTP entirely
+          console.log('Signup response missing user, forcing dashboard redirect');
+          const userType = formData.type.toLowerCase();
+          router.push(`/dashboard/${userType}`);
         }
       } else {
         setErrors({ general: data.error || 'Signup failed' });

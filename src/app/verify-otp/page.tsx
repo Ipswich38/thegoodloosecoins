@@ -183,40 +183,22 @@ function OTPForm({ email, userData }: OTPFormProps) {
 }
 
 function OTPVerificationPage() {
-  const searchParams = useSearchParams();
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [userData, setUserData] = useState(null);
 
   useEffect(() => {
-    const emailParam = searchParams.get('email');
-    const userDataParam = searchParams.get('userData');
+    // COMPLETELY BYPASS OTP - redirect to signup instead
+    console.log('🚫 OTP page accessed - redirecting to signup to avoid OTP flow');
+    router.push('/signup?message=' + encodeURIComponent('Email verification temporarily disabled. Please try signing up again.'));
+  }, [router]);
 
-    if (!emailParam) {
-      router.push('/signup');
-      return;
-    }
-
-    setEmail(emailParam);
-    
-    if (userDataParam) {
-      try {
-        setUserData(JSON.parse(decodeURIComponent(userDataParam)));
-      } catch (e) {
-        console.error('Failed to parse user data:', e);
-      }
-    }
-  }, [searchParams, router]);
-
-  if (!email) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin" />
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <Loader2 className="h-6 w-6 animate-spin mx-auto mb-4" />
+        <p>Redirecting you back to signup...</p>
       </div>
-    );
-  }
-
-  return <OTPForm email={email} userData={userData} />;
+    </div>
+  );
 }
 
 export default function VerifyOTPPage() {
