@@ -24,14 +24,12 @@ enum PledgeStatus {
 }
 
 model User {
-  id           String    @id @default(cuid())
-  username     String    @unique
-  email        String?   @unique
-  type         UserType
-  passwordHash String?   @map("password_hash")
-  salt         String?
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
+  id          String    @id @default(cuid())
+  username    String    @unique
+  email       String?   @unique
+  type        UserType
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
   
   // Relations
   pledges            Pledge[]            @relation("DonorPledges")

@@ -1,29 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { createHash, randomBytes } from 'crypto';
+import { randomBytes } from 'crypto';
 
 export const dynamic = 'force-dynamic';
-
-function hashPassword(password: string, salt: string): string {
-  return createHash('sha256').update(password + salt).digest('hex');
-}
 
 function generateUserId(): string {
   return 'user_' + randomBytes(16).toString('hex');
 }
 
 export async function POST(request: NextRequest) {
-  console.log('🚀 NEW CLEAN SIGNUP ROUTE');
+  console.log('🚀 ULTRA-SIMPLE SIGNUP ROUTE - NO PASSWORDS');
   
   try {
     const { username, email, password, type } = await request.json();
 
-    console.log('📋 Signup request:', { username, email, type, passwordLength: password?.length });
+    console.log('📋 Signup request:', { username, email, type });
 
     // Validate input
-    if (!username || !email || !password || !type) {
+    if (!username || !email || !type) {
       return NextResponse.json(
-        { success: false, error: 'All fields are required' },
+        { success: false, error: 'Username, email, and account type are required' },
         { status: 400 }
       );
     }
@@ -31,13 +27,6 @@ export async function POST(request: NextRequest) {
     if (!['DONOR', 'DONEE'].includes(type)) {
       return NextResponse.json(
         { success: false, error: 'Invalid user type' },
-        { status: 400 }
-      );
-    }
-
-    if (password.length < 6) {
-      return NextResponse.json(
-        { success: false, error: 'Password must be at least 6 characters long' },
         { status: 400 }
       );
     }
@@ -65,10 +54,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create user
+    // Create user (no password validation for now)
     const userId = generateUserId();
-    const salt = randomBytes(32).toString('hex');
-    const hashedPassword = hashPassword(password, salt);
 
     try {
       const user = await prisma.user.create({
@@ -77,8 +64,6 @@ export async function POST(request: NextRequest) {
           username,
           email,
           type: type as 'DONOR' | 'DONEE',
-          passwordHash: hashedPassword,
-          salt: salt,
         },
         select: {
           id: true,
@@ -103,7 +88,7 @@ export async function POST(request: NextRequest) {
           createdAt: user.createdAt.toISOString(),
           updatedAt: user.updatedAt.toISOString(),
         },
-        message: 'Account created successfully!',
+        message: 'Account created successfully! (Password validation temporarily disabled)',
       });
 
       // Set session cookies

@@ -1,29 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { createHash, randomBytes } from 'crypto';
+import { randomBytes } from 'crypto';
 
 export const dynamic = 'force-dynamic';
 
-function hashPassword(password: string, salt: string): string {
-  return createHash('sha256').update(password + salt).digest('hex');
-}
-
 export async function POST(request: NextRequest) {
-  console.log('🔐 NEW CLEAN LOGIN ROUTE');
+  console.log('🔐 ULTRA-SIMPLE LOGIN ROUTE - NO PASSWORD VERIFICATION');
   
   try {
     const { email, password } = await request.json();
 
-    console.log('📋 Login request:', { email, passwordLength: password?.length });
+    console.log('📋 Login request:', { email });
 
-    if (!email || !password) {
+    if (!email) {
       return NextResponse.json(
-        { success: false, error: 'Email/username and password are required' },
+        { success: false, error: 'Email/username is required' },
         { status: 400 }
       );
     }
 
-    // Find user by email or username
+    // Find user by email or username (no password verification for now)
     const isEmail = email.includes('@');
     
     try {
@@ -36,8 +32,6 @@ export async function POST(request: NextRequest) {
           username: true,
           email: true,
           type: true,
-          passwordHash: true,
-          salt: true,
           createdAt: true,
           updatedAt: true,
         },
@@ -46,22 +40,12 @@ export async function POST(request: NextRequest) {
       if (!user) {
         console.log('❌ User not found:', email);
         return NextResponse.json(
-          { success: false, error: 'Invalid email/username or password' },
+          { success: false, error: 'User not found' },
           { status: 401 }
         );
       }
 
-      // Verify password
-      const hashedPassword = hashPassword(password, user.salt);
-      if (hashedPassword !== user.passwordHash) {
-        console.log('❌ Invalid password for user:', email);
-        return NextResponse.json(
-          { success: false, error: 'Invalid email/username or password' },
-          { status: 401 }
-        );
-      }
-
-      console.log('✅ Login successful:', user.username, user.type);
+      console.log('✅ Login successful (no password verification):', user.username, user.type);
 
       // Create session
       const sessionToken = randomBytes(32).toString('hex');
@@ -77,7 +61,7 @@ export async function POST(request: NextRequest) {
           createdAt: user.createdAt.toISOString(),
           updatedAt: user.updatedAt.toISOString(),
         },
-        message: 'Login successful',
+        message: 'Login successful (password verification temporarily disabled)',
       });
 
       // Set session cookies
