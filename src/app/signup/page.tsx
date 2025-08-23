@@ -142,8 +142,8 @@ function SignupForm() {
           }),
         });
       } else {
-        // Regular email/password signup
-        response = await fetch('/api/auth/signup', {
+        // Regular email/password signup - try simple signup first
+        response = await fetch('/api/auth/simple-signup', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -155,6 +155,23 @@ function SignupForm() {
             type: formData.type,
           }),
         });
+        
+        // If simple signup fails, try the original route
+        if (!response.ok) {
+          console.log('Simple signup failed, trying original signup route...');
+          response = await fetch('/api/auth/signup', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              username: formData.username,
+              email: formData.email,
+              password: formData.password,
+              type: formData.type,
+            }),
+          });
+        }
       }
 
       const data = await response.json();
@@ -164,12 +181,12 @@ function SignupForm() {
           // OTP verification required - redirect to verification page
           const userDataParam = encodeURIComponent(JSON.stringify(data.userData));
           router.push(`/verify-otp?email=${encodeURIComponent(data.userData.email)}&userData=${userDataParam}`);
-        } else if (data.user && data.message.includes('logged in')) {
-          // User was automatically logged in (OAuth flow)
+        } else if (data.user) {
+          // User was created successfully - redirect to dashboard
           router.push(`/dashboard/${data.user.type.toLowerCase()}`);
         } else {
           // Fallback - redirect to login
-          router.push('/login?message=' + encodeURIComponent(data.message));
+          router.push('/login?message=' + encodeURIComponent(data.message || 'Account created successfully'));
         }
       } else {
         setErrors({ general: data.error || 'Signup failed' });

@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
       authData = sessionData;
       userId = sessionData.user.id;
     } else {
-      // Create user in Supabase Auth with email confirmation required
+      // Try different approach - create user with email confirmation disabled first
       const signUpResult = await supabase.auth.signUp({
         email,
         password: password!,
@@ -117,43 +117,88 @@ export async function POST(request: NextRequest) {
             username,
             user_type: type,
           },
-          // Don't set emailRedirectTo - this should default to sending OTP codes
+          emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/verify-email`,
         },
       });
 
+      console.log('Signup attempt:', {
+        error: signUpResult.error,
+        hasUser: !!signUpResult.data.user,
+        hasSession: !!signUpResult.data.session,
+        email
+      });
+
       if (signUpResult.error) {
-        return NextResponse.json(
-          { success: false, error: signUpResult.error.message },
-          { status: 400 }
-        );
-      }
-
-      if (!signUpResult.data.user) {
-        return NextResponse.json(
-          { success: false, error: 'Failed to create user' },
-          { status: 500 }
-        );
-      }
-
-      // Check if user needs email confirmation
-      if (!signUpResult.data.session) {
-        // User created but needs email verification - redirect to OTP page
-        return NextResponse.json({
-          success: true,
-          requiresOTP: true,
-          message: 'Please check your email for a 6-digit verification code to complete your registration.',
-          userData: {
-            username,
+        console.error('Signup error details:', signUpResult.error);
+        
+        // If the error is about OTP not being allowed, try without email confirmation
+        if (signUpResult.error.message.includes('otp') || signUpResult.error.message.includes('OTP')) {
+          console.log('Attempting signup without email confirmation...');
+          
+          // Try creating user without email confirmation
+          const altSignUpResult = await supabase.auth.signUp({
             email,
-            type,
-            userId: signUpResult.data.user.id,
-          },
-        });
-      }
+            password: password!,
+            options: {
+              data: {
+                username,
+                user_type: type,
+              },
+              emailRedirectTo: undefined, // No email confirmation
+            },
+          });
 
-      // If user was created and confirmed immediately, create database record
-      authData = signUpResult.data;
-      userId = signUpResult.data.user.id;
+          if (altSignUpResult.error) {
+            return NextResponse.json(
+              { success: false, error: altSignUpResult.error.message },
+              { status: 400 }
+            );
+          }
+
+          if (altSignUpResult.data.user) {
+            // User created successfully, proceed directly
+            authData = altSignUpResult.data;
+            userId = altSignUpResult.data.user.id;
+          } else {
+            return NextResponse.json(
+              { success: false, error: 'Failed to create user account' },
+              { status: 500 }
+            );
+          }
+        } else {
+          return NextResponse.json(
+            { success: false, error: signUpResult.error.message },
+            { status: 400 }
+          );
+        }
+      } else {
+        if (!signUpResult.data.user) {
+          return NextResponse.json(
+            { success: false, error: 'Failed to create user' },
+            { status: 500 }
+          );
+        }
+
+        // Check if user needs email confirmation
+        if (!signUpResult.data.session) {
+          // User created but needs email verification - redirect to OTP page
+          return NextResponse.json({
+            success: true,
+            requiresOTP: true,
+            message: 'Please check your email for a 6-digit verification code to complete your registration.',
+            userData: {
+              username,
+              email,
+              type,
+              userId: signUpResult.data.user.id,
+            },
+          });
+        }
+
+        // If user was created and confirmed immediately, create database record
+        authData = signUpResult.data;
+        userId = signUpResult.data.user.id;
+      }
     }
 
     // OAuth flow - create user in database immediately
