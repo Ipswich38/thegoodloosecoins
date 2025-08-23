@@ -4,6 +4,15 @@ import type { NextRequest } from 'next/server';
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // EMERGENCY BLOCK: Redirect verify-otp requests immediately
+  if (pathname.startsWith('/verify-otp')) {
+    console.log('🚫 MIDDLEWARE BLOCKING VERIFY-OTP ACCESS - REDIRECTING TO SIGNUP');
+    const url = request.nextUrl.clone();
+    url.pathname = '/signup';
+    url.search = '?message=Email+verification+is+disabled';
+    return NextResponse.redirect(url);
+  }
+
   // Skip middleware for static files, API routes, and public routes
   if (
     pathname.startsWith('/_next') ||
@@ -23,11 +32,13 @@ export async function middleware(request: NextRequest) {
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
   const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
 
-  // Get auth tokens from cookies
+  // Get auth tokens from cookies (support both Supabase and direct session)
   const accessToken = request.cookies.get('sb-access-token')?.value;
+  const directSession = request.cookies.get('app-session')?.value;
+  const userId = request.cookies.get('user-id')?.value;
 
-  // Simple authentication check - just check if tokens exist
-  const isAuthenticated = !!accessToken;
+  // Simple authentication check - check if any valid tokens exist
+  const isAuthenticated = !!(accessToken || (directSession && userId));
 
   // Redirect logic
   if (isProtectedRoute && !isAuthenticated) {

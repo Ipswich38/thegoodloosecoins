@@ -4,9 +4,11 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || 'https://wodsdkyipyiuqmhnsxkw.supabase.co';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim().replace(/[\s\n\r]/g, '') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndvZHNka3lpcHlpdXFtaG5zeGt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU4NTM0MDAsImV4cCI6MjA3MTQyOTQwMH0.09aiG6Gq2ubEvgHU5qfrUSozhUxWd49c5bPon5iC4XQ';
 
-// Validate the anon key format
-if (!supabaseAnonKey.match(/^[A-Za-z0-9+/]*={0,2}$/) || supabaseAnonKey.split('.').length !== 3) {
-  console.error('Invalid Supabase anon key format');
+// Validate the anon key format (more lenient validation)
+if (!supabaseAnonKey || supabaseAnonKey === 'undefined' || supabaseAnonKey.length < 10) {
+  console.error('Invalid Supabase anon key - key is missing or too short');
+} else {
+  console.log('✅ Supabase anon key loaded successfully');
 }
 
 export const supabase = createSupabaseClient(supabaseUrl, supabaseAnonKey);

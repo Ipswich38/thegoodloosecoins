@@ -208,10 +208,22 @@ function OTPVerificationPage() {
 }
 
 export default function VerifyOTPPage() {
+  // BLOCK THIS ENTIRE PAGE - IMMEDIATE REDIRECT
+  if (typeof window !== 'undefined') {
+    console.log('🚫 VERIFY-OTP PAGE BLOCKED AT COMPONENT LEVEL');
+    window.location.href = '/signup?message=Email+verification+disabled';
+  }
+  
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-red-100">
+        <div className="text-center">
+          <div className="text-red-600 font-bold mb-2">⚠️ EMAIL VERIFICATION DISABLED</div>
+          <div className="text-sm">Redirecting to signup...</div>
+          <script dangerouslySetInnerHTML={{
+            __html: `window.location.href = '/signup?message=Email+verification+disabled';`
+          }} />
+        </div>
       </div>
     }>
       <OTPVerificationPage />
