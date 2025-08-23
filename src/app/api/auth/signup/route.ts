@@ -191,12 +191,18 @@ export async function POST(request: NextRequest) {
     return response;
   } catch (error) {
     console.error('Signup error:', error);
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    console.error('Error message:', error instanceof Error ? error.message : String(error));
     
     // If there was an error creating the database user but Supabase user was created,
     // we should clean up the Supabase user (this would require admin privileges)
     
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { 
+        success: false, 
+        error: 'Internal server error',
+        details: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined
+      },
       { status: 500 }
     );
   }
