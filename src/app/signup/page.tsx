@@ -143,7 +143,9 @@ function SignupForm() {
         });
       } else {
         // Regular email/password signup - try direct signup first (bypasses all Supabase issues)
-        console.log('Attempting direct signup...');
+        console.log('🎯 ATTEMPTING DIRECT SIGNUP ROUTE...');
+        
+        let routeUsed = 'direct-signup';
         response = await fetch('/api/auth/direct-signup', {
           method: 'POST',
           headers: {
@@ -157,9 +159,12 @@ function SignupForm() {
           }),
         });
         
+        console.log(`📡 Direct signup response status: ${response.status}`);
+        
         // If direct signup fails, try simple signup
         if (!response.ok) {
-          console.log('Direct signup failed, trying simple signup...');
+          console.log('❌ Direct signup failed, trying simple signup...');
+          routeUsed = 'simple-signup';
           response = await fetch('/api/auth/simple-signup', {
             method: 'POST',
             headers: {
@@ -173,9 +178,12 @@ function SignupForm() {
             }),
           });
           
+          console.log(`📡 Simple signup response status: ${response.status}`);
+          
           // If simple signup also fails, try the original route
           if (!response.ok) {
-            console.log('Simple signup also failed, trying original signup route...');
+            console.log('❌ Simple signup also failed, trying original signup route...');
+            routeUsed = 'signup';
             response = await fetch('/api/auth/signup', {
               method: 'POST',
               headers: {
@@ -188,24 +196,38 @@ function SignupForm() {
                 type: formData.type,
               }),
             });
+            
+            console.log(`📡 Original signup response status: ${response.status}`);
           }
         }
+        
+        console.log(`🏆 FINAL ROUTE USED: /api/auth/${routeUsed}`);
       }
 
       const data = await response.json();
+      
+      console.log('📋 FULL SIGNUP RESPONSE:', data);
+      console.log('📋 Signup response breakdown:', {
+        success: data.success,
+        hasUser: !!data.user,
+        userType: data.user?.type,
+        requiresOTP: data.requiresOTP,
+        error: data.error,
+        message: data.message
+      });
 
       if (data.success) {
-        if (data.user) {
-          // User was created successfully - redirect to dashboard immediately
-          console.log('Signup successful, redirecting to dashboard for user type:', data.user.type);
-          router.push(`/dashboard/${data.user.type.toLowerCase()}`);
-        } else {
-          // Force redirect to dashboard even if user object is missing - skip OTP entirely
-          console.log('Signup response missing user, forcing dashboard redirect');
-          const userType = formData.type.toLowerCase();
-          router.push(`/dashboard/${userType}`);
-        }
+        // COMPLETELY IGNORE ALL OTP/EMAIL VERIFICATION - ALWAYS GO TO DASHBOARD
+        const userType = data.user?.type?.toLowerCase() || formData.type.toLowerCase();
+        console.log(`🚀 BYPASSING ALL EMAIL VERIFICATION - DIRECT DASHBOARD REDIRECT for type: ${userType}`);
+        console.log(`🔥 IGNORING requiresOTP: ${data.requiresOTP} - FORCING DASHBOARD ACCESS`);
+        
+        // NUCLEAR OPTION: Ignore ALL server responses about OTP/verification
+        // Just redirect to dashboard immediately on any success
+        router.replace(`/dashboard/${userType}`);
+        return; // Exit immediately to prevent any further processing
       } else {
+        console.log('❌ Signup failed:', data.error);
         setErrors({ general: data.error || 'Signup failed' });
       }
     } catch (error) {

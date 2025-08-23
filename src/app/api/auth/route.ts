@@ -8,9 +8,17 @@ export const dynamic = 'force-dynamic';
 
 // POST /api/auth - Login
 export async function POST(request: NextRequest) {
+  console.log('🔐 LOGIN ROUTE - Processing login request...');
+  
   try {
     const body: LoginRequest = await request.json();
     const { email, password } = body;
+
+    console.log('📋 Login attempt details:', {
+      email: email,
+      isEmail: email?.includes('@'),
+      passwordLength: password?.length
+    });
 
     if (!email || !password) {
       return NextResponse.json(
@@ -22,16 +30,26 @@ export async function POST(request: NextRequest) {
     // Determine if input is email or username
     const isEmail = email.includes('@');
     let actualEmail = email;
+    let userRecord = null;
 
     // If username is provided, find the corresponding email
     if (!isEmail) {
+      console.log('🔍 Looking up username:', email);
       try {
-        const userRecord = await prisma.user.findUnique({
+        userRecord = await prisma.user.findUnique({
           where: { username: email },
-          select: { email: true },
+          select: { 
+            id: true,
+            email: true, 
+            username: true, 
+            type: true,
+            createdAt: true,
+            updatedAt: true 
+          },
         });
 
         if (!userRecord || !userRecord.email) {
+          console.log('❌ Username not found:', email);
           return NextResponse.json(
             { success: false, error: 'Invalid username or password' },
             { status: 401 }
@@ -39,6 +57,7 @@ export async function POST(request: NextRequest) {
         }
 
         actualEmail = userRecord.email;
+        console.log('✅ Username found, email:', actualEmail);
       } catch (dbError) {
         console.error('Database error during username lookup:', dbError);
         return NextResponse.json(
@@ -46,8 +65,35 @@ export async function POST(request: NextRequest) {
           { status: 503 }
         );
       }
+    } else {
+      // For email login, also get user record from database
+      console.log('🔍 Looking up email:', email);
+      try {
+        userRecord = await prisma.user.findUnique({
+          where: { email: actualEmail },
+          select: { 
+            id: true,
+            email: true, 
+            username: true, 
+            type: true,
+            createdAt: true,
+            updatedAt: true 
+          },
+        });
+        
+        if (userRecord) {
+          console.log('✅ Email found in database:', userRecord.username, userRecord.type);
+        } else {
+          console.log('⚠️ Email not found in database, will try Supabase auth');
+        }
+      } catch (dbError) {
+        console.error('Database error during email lookup:', dbError);
+        // Continue with Supabase auth attempt
+      }
     }
 
+    console.log('🔑 Attempting Supabase authentication...');
+    
     // Authenticate with Supabase using the email
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
       email: actualEmail,
@@ -55,6 +101,17 @@ export async function POST(request: NextRequest) {
     });
 
     if (authError) {
+      console.log('❌ Supabase auth failed:', authError.message);
+      
+      // If Supabase auth fails but we have a user record (from direct signup), 
+      // we need to handle direct auth differently
+      if (userRecord) {
+        console.log('⚠️ Supabase auth failed but user exists in DB - this is likely a direct signup user');
+        console.log('🚧 Direct password verification not yet implemented');
+        // TODO: Implement password verification for direct signup users
+        // For now, return the Supabase error
+      }
+      
       return NextResponse.json(
         { success: false, error: isEmail ? authError.message : 'Invalid username or password' },
         { status: 401 }
@@ -62,11 +119,14 @@ export async function POST(request: NextRequest) {
     }
 
     if (!authData.user) {
+      console.log('❌ No user data from Supabase');
       return NextResponse.json(
         { success: false, error: 'Authentication failed' },
         { status: 401 }
       );
     }
+
+    console.log('✅ Supabase authentication successful');
 
     // Get user data from our database
     let user;

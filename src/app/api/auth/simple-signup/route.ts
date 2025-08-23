@@ -125,6 +125,8 @@ export async function POST(request: NextRequest) {
       };
     }
 
+    console.log('✅ Simple signup SUCCESS for user:', user.username, 'type:', user.type);
+
     const response = NextResponse.json({
       success: true,
       user: {
@@ -135,6 +137,8 @@ export async function POST(request: NextRequest) {
       message: data.session 
         ? 'Account created and logged in successfully' 
         : 'Account created successfully',
+      // NEVER require OTP
+      requiresOTP: false,
     });
 
     // Set session cookies if available

@@ -179,20 +179,12 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        // Check if user needs email confirmation
+        // DISABLED: No longer require email confirmation - proceed directly
+        // OLD CODE: if (!signUpResult.data.session) { requiresOTP: true }
+        // NEW CODE: Force direct login even without session
+        console.log('🚫 BYPASSING EMAIL VERIFICATION - NO OTP REQUIRED');
         if (!signUpResult.data.session) {
-          // User created but needs email verification - redirect to OTP page
-          return NextResponse.json({
-            success: true,
-            requiresOTP: true,
-            message: 'Please check your email for a 6-digit verification code to complete your registration.',
-            userData: {
-              username,
-              email,
-              type,
-              userId: signUpResult.data.user.id,
-            },
-          });
+          console.log('⚡ No session from signup, but proceeding without OTP anyway');
         }
 
         // If user was created and confirmed immediately, create database record
@@ -242,6 +234,8 @@ export async function POST(request: NextRequest) {
         updatedAt: user.updatedAt.toISOString(),
       },
       message: 'Account created and logged in successfully',
+      // EXPLICITLY prevent OTP requirement
+      requiresOTP: false,
     });
 
     // Set session cookies

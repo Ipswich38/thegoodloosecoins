@@ -52,35 +52,59 @@ export default function DonorDashboard() {
   };
 
   const checkAuthStatus = async () => {
+    console.log('🔐 DONOR DASHBOARD - Checking authentication status...');
+    
     try {
       // First try the new direct session check
+      console.log('📡 Trying /api/auth/check-session...');
       let response = await fetch('/api/auth/check-session');
       
+      console.log('📋 Check-session response:', {
+        status: response.status,
+        ok: response.ok,
+        url: response.url
+      });
+      
       if (!response.ok) {
+        console.log('📡 Check-session failed, trying /api/auth/me...');
         // Fallback to the original auth/me endpoint
         response = await fetch('/api/auth/me');
+        console.log('📋 Auth/me response:', {
+          status: response.status,
+          ok: response.ok
+        });
       }
       
       if (response.ok) {
         const data = await response.json();
+        console.log('✅ Auth check SUCCESS:', {
+          success: data.success,
+          hasUser: !!data.user,
+          userType: data.user?.type,
+          userEmail: data.user?.email
+        });
+        
         if (data.success && data.user) {
           const userData = data.user;
           setUser(userData);
           
           // Redirect if user type doesn't match
           if (userData.type !== 'DONOR') {
+            console.log(`🔄 Wrong user type (${userData.type}), redirecting to correct dashboard`);
             router.replace(`/dashboard/${userData.type.toLowerCase()}`);
             return;
           }
+          
+          console.log('🎉 DONOR DASHBOARD ACCESS GRANTED');
         } else {
           // User not found in database but response was OK
-          console.error('User data not found in response:', data);
+          console.error('❌ User data not found in response:', data);
           router.replace('/login?message=' + encodeURIComponent('Please log in again'));
           return;
         }
       } else if (response.status === 503) {
         // Database temporarily unavailable - create fallback user
-        console.warn('Database temporarily unavailable, using fallback authentication');
+        console.warn('⚠️ Database temporarily unavailable, using fallback authentication');
         setUser({
           id: 'temp',
           username: 'User',
@@ -91,12 +115,12 @@ export default function DonorDashboard() {
         });
       } else {
         // User not authenticated, redirect to login
-        console.log('Authentication failed with status:', response.status);
+        console.log('❌ Authentication failed with status:', response.status);
         router.replace('/login?message=' + encodeURIComponent('Please log in to access your dashboard'));
         return;
       }
     } catch (error) {
-      console.error('Error checking auth status:', error);
+      console.error('🚨 Error checking auth status:', error);
       // Network error - try to continue with limited functionality
       router.replace('/login?message=' + encodeURIComponent('Connection error. Please try again.'));
       return;

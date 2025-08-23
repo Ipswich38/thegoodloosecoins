@@ -42,10 +42,9 @@ function LoginForm() {
     const newErrors: FormErrors = {};
 
     if (!formData.email) {
-      newErrors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
+      newErrors.email = 'Email or username is required';
     }
+    // Remove email format validation since we accept both email and username
 
     if (!formData.password) {
       newErrors.password = 'Password is required';
@@ -66,6 +65,12 @@ function LoginForm() {
     setErrors({});
 
     try {
+      console.log('🔐 LOGIN ATTEMPT:', {
+        email: formData.email,
+        isEmail: formData.email.includes('@'),
+        passwordLength: formData.password.length
+      });
+
       const response = await fetch('/api/auth', {
         method: 'POST',
         headers: {
@@ -74,16 +79,29 @@ function LoginForm() {
         body: JSON.stringify(formData),
       });
 
+      console.log('📡 Login response status:', response.status);
       const data = await response.json();
+      
+      console.log('📋 LOGIN RESPONSE:', {
+        success: data.success,
+        hasUser: !!data.user,
+        userType: data.user?.type,
+        error: data.error,
+        message: data.message
+      });
 
-      if (data.success) {
-        // Redirect to dashboard based on user type
-        router.push(`/dashboard/${data.user.type.toLowerCase()}`);
+      if (data.success && data.user) {
+        const userType = data.user.type.toLowerCase();
+        console.log(`🎯 LOGIN SUCCESS - Redirecting to dashboard/${userType}`);
+        
+        // Force redirect to dashboard
+        router.replace(`/dashboard/${userType}`);
       } else {
+        console.log('❌ Login failed:', data.error);
         setErrors({ general: data.error || 'Login failed' });
       }
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('🚨 Login error:', error);
       setErrors({ general: 'An unexpected error occurred. Please try again.' });
     } finally {
       setIsLoading(false);

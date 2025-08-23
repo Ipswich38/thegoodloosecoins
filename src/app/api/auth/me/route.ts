@@ -7,16 +7,71 @@ export const dynamic = 'force-dynamic';
 
 // GET /api/auth/me - Get current user
 export async function GET(request: NextRequest) {
+  console.log('🔍 AUTH/ME - Checking user authentication...');
+  
   try {
+    // Check for both Supabase cookies and direct session cookies
     const accessToken = request.cookies.get('sb-access-token')?.value;
     const refreshToken = request.cookies.get('sb-refresh-token')?.value;
+    const appSession = request.cookies.get('app-session')?.value;
+    const userId = request.cookies.get('user-id')?.value;
+
+    console.log('🍪 Available cookies:', {
+      hasSupabaseTokens: !!(accessToken && refreshToken),
+      hasDirectSession: !!(appSession && userId),
+      accessToken: accessToken ? '***' : null,
+      refreshToken: refreshToken ? '***' : null,
+      appSession: appSession ? '***' : null,
+      userId: userId
+    });
+
+    // If we have direct session cookies, handle them
+    if (appSession && userId && !accessToken) {
+      console.log('🔄 Using direct session authentication...');
+      try {
+        const user = await prisma.user.findUnique({
+          where: { id: userId },
+          select: {
+            id: true,
+            username: true,
+            email: true,
+            type: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        });
+
+        if (user) {
+          console.log('✅ Direct session user found:', user.username, user.type);
+          return NextResponse.json({
+            success: true,
+            user: {
+              ...user,
+              createdAt: user.createdAt.toISOString(),
+              updatedAt: user.updatedAt.toISOString(),
+            },
+          });
+        } else {
+          console.log('❌ Direct session user not found in database');
+        }
+      } catch (dbError) {
+        console.error('Database error checking direct session:', dbError);
+        return NextResponse.json(
+          { success: false, error: 'Database temporarily unavailable' },
+          { status: 503 }
+        );
+      }
+    }
 
     if (!accessToken) {
+      console.log('❌ No authentication tokens found');
       return NextResponse.json(
         { success: false, error: 'No access token found' },
         { status: 401 }
       );
     }
+
+    console.log('🔄 Using Supabase session authentication...');
 
     // Set the session in Supabase client
     const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
