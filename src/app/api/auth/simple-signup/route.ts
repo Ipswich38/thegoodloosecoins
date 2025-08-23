@@ -55,7 +55,8 @@ export async function POST(request: NextRequest) {
       console.warn('Database check failed, proceeding:', dbError);
     }
 
-    // Create user in Supabase without email confirmation requirement
+    // Create user in Supabase without any email confirmation
+    console.log('Attempting Supabase signup for:', email);
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -64,9 +65,17 @@ export async function POST(request: NextRequest) {
           username,
           user_type: type,
         },
-        // Try to disable email confirmation
-        emailRedirectTo: undefined,
+        // Explicitly disable all email confirmation
+        emailRedirectTo: null,
       },
+    });
+    
+    console.log('Supabase signup result:', {
+      success: !error,
+      error: error?.message,
+      hasUser: !!data?.user,
+      hasSession: !!data?.session,
+      userConfirmed: data?.user?.email_confirmed_at ? true : false,
     });
 
     if (error) {

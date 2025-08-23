@@ -48,7 +48,14 @@ export default function DoneeDashboard() {
 
   const checkAuthStatus = async () => {
     try {
-      const response = await fetch('/api/auth/me');
+      // First try the new direct session check
+      let response = await fetch('/api/auth/check-session');
+      
+      if (!response.ok) {
+        // Fallback to the original auth/me endpoint
+        response = await fetch('/api/auth/me');
+      }
+      
       if (response.ok) {
         const data = await response.json();
         if (data.success && data.user) {

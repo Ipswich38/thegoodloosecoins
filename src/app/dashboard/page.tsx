@@ -12,11 +12,18 @@ export default function DashboardPage() {
   useEffect(() => {
     const redirectToUserDashboard = async () => {
       try {
-        // Get current user info
-        const response = await fetch('/api/auth/me', {
+        // Try direct session check first, then fallback to Supabase auth
+        let response = await fetch('/api/auth/check-session', {
           method: 'GET',
           credentials: 'include',
         });
+        
+        if (!response.ok) {
+          response = await fetch('/api/auth/me', {
+            method: 'GET',
+            credentials: 'include',
+          });
+        }
 
         if (!response.ok) {
           // User is not authenticated, redirect to login

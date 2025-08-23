@@ -142,8 +142,9 @@ function SignupForm() {
           }),
         });
       } else {
-        // Regular email/password signup - try simple signup first
-        response = await fetch('/api/auth/simple-signup', {
+        // Regular email/password signup - try direct signup first (bypasses all Supabase issues)
+        console.log('Attempting direct signup...');
+        response = await fetch('/api/auth/direct-signup', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -156,10 +157,10 @@ function SignupForm() {
           }),
         });
         
-        // If simple signup fails, try the original route
+        // If direct signup fails, try simple signup
         if (!response.ok) {
-          console.log('Simple signup failed, trying original signup route...');
-          response = await fetch('/api/auth/signup', {
+          console.log('Direct signup failed, trying simple signup...');
+          response = await fetch('/api/auth/simple-signup', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -171,6 +172,23 @@ function SignupForm() {
               type: formData.type,
             }),
           });
+          
+          // If simple signup also fails, try the original route
+          if (!response.ok) {
+            console.log('Simple signup also failed, trying original signup route...');
+            response = await fetch('/api/auth/signup', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                username: formData.username,
+                email: formData.email,
+                password: formData.password,
+                type: formData.type,
+              }),
+            });
+          }
         }
       }
 
