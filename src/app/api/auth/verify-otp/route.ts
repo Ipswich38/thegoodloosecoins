@@ -15,12 +15,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify OTP with Supabase
-    const { data, error } = await supabase.auth.verifyOtp({
+    // Verify OTP with Supabase - try both email confirmation and OTP types
+    let data, error;
+    
+    // First try as email confirmation token
+    const confirmResult = await supabase.auth.verifyOtp({
       email,
       token: otp,
-      type: 'email',
+      type: 'signup',
     });
+    
+    if (confirmResult.error) {
+      // If that fails, try as regular email OTP
+      const otpResult = await supabase.auth.verifyOtp({
+        email,
+        token: otp,
+        type: 'email',
+      });
+      
+      data = otpResult.data;
+      error = otpResult.error;
+    } else {
+      data = confirmResult.data;
+      error = confirmResult.error;
+    }
 
     if (error) {
       return NextResponse.json(

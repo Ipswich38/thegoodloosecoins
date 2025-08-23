@@ -108,39 +108,52 @@ export async function POST(request: NextRequest) {
       authData = sessionData;
       userId = sessionData.user.id;
     } else {
-      // Send OTP for email verification instead of creating user immediately
-      const { error: otpError } = await supabase.auth.signInWithOtp({
+      // Create user in Supabase Auth but don't confirm email automatically
+      const signUpResult = await supabase.auth.signUp({
         email,
+        password: password!,
         options: {
-          shouldCreateUser: false, // Don't create user yet
           data: {
             username,
             user_type: type,
-            password: password!, // Store password temporarily in metadata
-            signup_flow: true,
           },
+          emailRedirectTo: undefined, // Disable redirect URLs
         },
       });
 
-      if (otpError) {
+      if (signUpResult.error) {
         return NextResponse.json(
-          { success: false, error: otpError.message },
+          { success: false, error: signUpResult.error.message },
           { status: 400 }
         );
       }
 
-      // Return success with OTP sent message
-      return NextResponse.json({
-        success: true,
-        requiresOTP: true,
-        message: 'Please check your email for a 6-digit verification code to complete your registration.',
-        userData: {
-          username,
-          email,
-          type,
-          password: password!,
-        },
-      });
+      if (!signUpResult.data.user) {
+        return NextResponse.json(
+          { success: false, error: 'Failed to create user' },
+          { status: 500 }
+        );
+      }
+
+      // Check if user needs email confirmation
+      if (!signUpResult.data.session && signUpResult.data.user && !signUpResult.data.user.email_confirmed_at) {
+        // User created but needs email verification - redirect to OTP page
+        return NextResponse.json({
+          success: true,
+          requiresOTP: true,
+          message: 'Please check your email for a 6-digit verification code to complete your registration.',
+          userData: {
+            username,
+            email,
+            type,
+            userId: signUpResult.data.user.id,
+          },
+        });
+      }
+
+      // If user was created and confirmed immediately, create database record
+      authData = signUpResult.data;
+      userId = signUpResult.data.user.id;
     }
 
     // OAuth flow - create user in database immediately
