@@ -86,18 +86,28 @@ async function getUserResponse(email: string | undefined) {
     );
   }
 
-  // Get user data from our database
-  const user = await prisma.user.findUnique({
-    where: { email },
-    select: {
-      id: true,
-      username: true,
-      email: true,
-      type: true,
-      createdAt: true,
-      updatedAt: true,
-    },
-  });
+  // Get user data from our database with fallback
+  let user;
+  try {
+    user = await prisma.user.findUnique({
+      where: { email },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        type: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+  } catch (dbError) {
+    console.error('Database error in /api/auth/me:', dbError);
+    // If database is down, we can't get user data
+    return NextResponse.json(
+      { success: false, error: 'Database temporarily unavailable' },
+      { status: 503 }
+    );
+  }
 
   if (!user) {
     return NextResponse.json(

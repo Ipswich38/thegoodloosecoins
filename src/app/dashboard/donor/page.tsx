@@ -56,21 +56,43 @@ export default function DonorDashboard() {
       const response = await fetch('/api/auth/me');
       if (response.ok) {
         const data = await response.json();
-        const userData = data.user;
-        setUser(userData);
-        
-        // Redirect if user type doesn't match
-        if (userData && userData.type !== 'DONOR') {
-          router.replace(`/dashboard/${userData.type.toLowerCase()}`);
+        if (data.success && data.user) {
+          const userData = data.user;
+          setUser(userData);
+          
+          // Redirect if user type doesn't match
+          if (userData.type !== 'DONOR') {
+            router.replace(`/dashboard/${userData.type.toLowerCase()}`);
+            return;
+          }
+        } else {
+          // User not found in database but response was OK
+          console.error('User data not found in response:', data);
+          router.replace('/login?message=' + encodeURIComponent('Please log in again'));
           return;
         }
+      } else if (response.status === 503) {
+        // Database temporarily unavailable - create fallback user
+        console.warn('Database temporarily unavailable, using fallback authentication');
+        setUser({
+          id: 'temp',
+          username: 'User',
+          email: 'user@example.com',
+          type: 'DONOR',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
       } else {
         // User not authenticated, redirect to login
-        router.replace('/login');
+        console.log('Authentication failed with status:', response.status);
+        router.replace('/login?message=' + encodeURIComponent('Please log in to access your dashboard'));
         return;
       }
     } catch (error) {
       console.error('Error checking auth status:', error);
+      // Network error - try to continue with limited functionality
+      router.replace('/login?message=' + encodeURIComponent('Connection error. Please try again.'));
+      return;
     } finally {
       setIsLoading(false);
     }
@@ -84,12 +106,30 @@ export default function DonorDashboard() {
     );
   }
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin h-8 w-8 border-4 border-primary-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">Loading Dashboard</h2>
+          <p className="text-gray-600">Please wait while we verify your access...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
-          <p className="text-gray-600">Please log in to access your dashboard.</p>
+          <p className="text-gray-600 mb-4">Please log in to access your dashboard.</p>
+          <button
+            onClick={() => router.push('/login')}
+            className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+          >
+            Go to Login
+          </button>
         </div>
       </div>
     );
