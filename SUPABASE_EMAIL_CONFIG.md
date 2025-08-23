@@ -20,10 +20,14 @@
    - **Body**: Customize to use your branding and mention the 6-digit code
 
 ### Step 3: Force OTP Instead of Magic Links
-1. In **Authentication** → **Settings** 
-2. Find **Email confirmation** section
-3. **Disable** "Enable email confirmations" if it forces magic links
-4. **Enable** "Enable OTP" or similar option for 6-digit codes
+1. In **Authentication** → **Settings** → **General**
+2. Look for **"Confirm email"** toggle - this should be **ENABLED**
+3. Look for **"Secure email change"** toggle - this should be **ENABLED**  
+4. In **URL Configuration** section:
+   - **Site URL**: Set to your production domain
+   - **Redirect URLs**: Add your production domain
+5. **Important**: Do NOT set custom redirect URLs in email templates - leave empty to force OTP codes
+6. If you see options for "Magic Link" vs "OTP", choose **OTP**
 
 ### Step 4: Custom SMTP (Optional - Requires Paid Plan)
 For complete control over sender name and domain:

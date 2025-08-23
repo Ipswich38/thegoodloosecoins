@@ -54,31 +54,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // If userData is provided, this is completing a signup process
+    // If userData is provided, this is completing a signup process  
     if (userData) {
-      const { username, type, password } = userData;
+      const { username, type, userId } = userData;
       
-      // OTP was verified, now create the user account with password
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            username,
-            user_type: type,
-          },
-          emailRedirectTo: undefined, // No redirect needed since we're already verified
-        },
-      });
-
-      if (signUpError || !signUpData.user) {
-        return NextResponse.json(
-          { success: false, error: signUpError?.message || 'Failed to create user account' },
-          { status: 400 }
-        );
-      }
-
-      const authUser = signUpData.user;
+      // User account already exists from signup, just confirmed email
+      const authUser = data.user;
       
       // Create user in our database
       try {
