@@ -170,6 +170,12 @@ function OTPForm({ email, userData }: OTPFormProps) {
           <p className="text-xs text-gray-500">
             The verification code will expire in 10 minutes
           </p>
+          <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+            <p className="text-xs text-blue-600">
+              <strong>💡 Tip:</strong> If you received an email with a confirmation link instead of a code, 
+              look for a 6-digit code in the email body or URL parameters.
+            </p>
+          </div>
         </div>
       </div>
     </div>
