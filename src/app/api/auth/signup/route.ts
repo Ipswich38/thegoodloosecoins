@@ -55,12 +55,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Create user (no password validation for now)
-    const userId = generateUserId();
-
     try {
       const user = await prisma.user.create({
         data: {
-          id: userId,
           username,
           email,
           type: type as 'DONOR' | 'DONEE',
@@ -75,7 +72,7 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      console.log('✅ User created successfully:', userId, type);
+      console.log('✅ User created successfully:', user.id, type);
 
       // Create session
       const sessionToken = randomBytes(32).toString('hex');
@@ -100,7 +97,7 @@ export async function POST(request: NextRequest) {
         path: '/',
       });
 
-      response.cookies.set('user-id', userId, {
+      response.cookies.set('user-id', user.id, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',

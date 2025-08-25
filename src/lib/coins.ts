@@ -1,11 +1,11 @@
 import { CoinCount } from '@/types/pledge';
 
-// Coin values in dollars
+// Coin values in Philippine Pesos
 export const COIN_VALUES = {
-  quarters: 0.25,
-  dimes: 0.10,
-  nickels: 0.05,
-  pennies: 0.01,
+  quarters: 5.00,    // ₱5 coin
+  dimes: 1.00,       // ₱1 coin
+  nickels: 0.50,     // 50 centavos
+  pennies: 0.25,     // 25 centavos
 } as const;
 
 export function calculateCoinTotal(coinCount: Partial<CoinCount>): number {
@@ -20,26 +20,26 @@ export function calculateCoinTotal(coinCount: Partial<CoinCount>): number {
 }
 
 export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('en-PH', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'PHP',
     minimumFractionDigits: 2,
   }).format(amount);
 }
 
 export function convertAmountToCoins(amount: number): CoinCount {
-  let remaining = Math.round(amount * 100); // Convert to cents
+  let remaining = Math.round(amount * 100); // Convert to centavos
   
-  const quarters = Math.floor(remaining / 25);
-  remaining -= quarters * 25;
+  const quarters = Math.floor(remaining / 500); // ₱5 coins
+  remaining -= quarters * 500;
   
-  const dimes = Math.floor(remaining / 10);
-  remaining -= dimes * 10;
+  const dimes = Math.floor(remaining / 100);    // ₱1 coins
+  remaining -= dimes * 100;
   
-  const nickels = Math.floor(remaining / 5);
-  remaining -= nickels * 5;
+  const nickels = Math.floor(remaining / 50);   // 50 centavos
+  remaining -= nickels * 50;
   
-  const pennies = remaining;
+  const pennies = Math.floor(remaining / 25);   // 25 centavos
   
   return {
     quarters,
@@ -79,10 +79,10 @@ export function validateCoinCounts(coinCount: Partial<CoinCount>): string[] {
 
 export function getCoinDisplayName(coinType: keyof Omit<CoinCount, 'total'>): string {
   const names = {
-    quarters: 'Quarters ($0.25)',
-    dimes: 'Dimes ($0.10)',
-    nickels: 'Nickels ($0.05)',
-    pennies: 'Pennies ($0.01)',
+    quarters: '₱5 Coins (₱5.00)',
+    dimes: '₱1 Coins (₱1.00)',
+    nickels: '50 Centavos (₱0.50)',
+    pennies: '25 Centavos (₱0.25)',
   };
   
   return names[coinType];
