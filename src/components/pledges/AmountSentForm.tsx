@@ -43,7 +43,7 @@ export default function AmountSentForm({
     }
 
     if (totalAfterUpdate > pledgeAmount) {
-      setError(`Amount sent cannot exceed pledge amount ($${pledgeAmount.toFixed(2)})`);
+      setError(`Amount sent cannot exceed pledge amount (₱${pledgeAmount.toFixed(2)})`);
       setIsLoading(false);
       return;
     }
@@ -108,19 +108,19 @@ export default function AmountSentForm({
             <div>
               <span className="text-gray-600">Pledge Amount:</span>
               <span className="font-semibold text-gray-900 ml-2">
-                ${pledgeAmount.toFixed(2)}
+                ₱{pledgeAmount.toFixed(2)}
               </span>
             </div>
             <div>
               <span className="text-gray-600">Already Sent:</span>
               <span className="font-semibold text-gray-900 ml-2">
-                ${currentAmountSent.toFixed(2)}
+                ₱{currentAmountSent.toFixed(2)}
               </span>
             </div>
             <div>
               <span className="text-gray-600">Remaining:</span>
               <span className="font-semibold text-gray-900 ml-2">
-                ${remainingAmount.toFixed(2)}
+                ₱{remainingAmount.toFixed(2)}
               </span>
             </div>
             <div>
@@ -159,7 +159,7 @@ export default function AmountSentForm({
             </div>
           </div>
           <p className="mt-2 text-sm text-gray-600">
-            Maximum additional amount: ${remainingAmount.toFixed(2)}
+            Maximum additional amount: ₱{remainingAmount.toFixed(2)}
           </p>
         </div>
 
@@ -171,7 +171,7 @@ export default function AmountSentForm({
               <div>
                 <span className="text-gray-600">Total Sent:</span>
                 <span className="font-semibold text-gray-900 ml-2">
-                  ${totalAfterUpdate.toFixed(2)}
+                  ₱{totalAfterUpdate.toFixed(2)}
                 </span>
               </div>
               <div>

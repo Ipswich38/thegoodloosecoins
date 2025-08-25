@@ -202,7 +202,7 @@ export default function Leaderboard({ currentUserId, limit = 10, className = '' 
                       </div>
                       <div className="flex items-center space-x-1">
                         <span>•</span>
-                        <span>${entry.totalDonated.toFixed(2)} donated</span>
+                        <span>₱{entry.totalDonated.toFixed(2)} donated</span>
                       </div>
                     </div>
                   </div>
@@ -244,7 +244,7 @@ export default function Leaderboard({ currentUserId, limit = 10, className = '' 
                   </div>
                   <div className="flex items-center space-x-1">
                     <span>•</span>
-                    <span>${currentUserRank.totalDonated.toFixed(2)} donated</span>
+                    <span>₱{currentUserRank.totalDonated.toFixed(2)} donated</span>
                   </div>
                 </div>
               </div>
@@ -274,10 +274,10 @@ export default function Leaderboard({ currentUserId, limit = 10, className = '' 
                   <span className="font-medium">Task Completion:</span> 5-20 points
                 </div>
                 <div>
-                  <span className="font-medium">Small Pledge Bonus:</span> 5 points ($5-$24.99)
+                  <span className="font-medium">Small Pledge Bonus:</span> 5 points (₱5-₱24.99)
                 </div>
                 <div>
-                  <span className="font-medium">Large Pledge Bonus:</span> 50+ points ($100+)
+                  <span className="font-medium">Large Pledge Bonus:</span> 50+ points (₱100+)
                 </div>
               </div>
             </div>

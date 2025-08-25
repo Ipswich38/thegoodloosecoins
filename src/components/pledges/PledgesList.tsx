@@ -197,7 +197,7 @@ export default function PledgesList({ userType, onPledgeUpdate, className = '' }
                   type="number"
                   value={filters.maxAmount || ''}
                   onChange={(e) => handleFilterChange('maxAmount', parseFloat(e.target.value))}
-                  placeholder="$1000.00"
+                  placeholder="₱1000.00"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
                 />
               </div>

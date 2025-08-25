@@ -155,7 +155,7 @@ export default function DoneeDashboard() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Available Funds</p>
-                <p className="text-2xl font-bold text-gray-900">${stats?.availableFunds.toFixed(2) || '0.00'}</p>
+                <p className="text-2xl font-bold text-gray-900">₱{stats?.availableFunds.toFixed(2) || '0.00'}</p>
                 <p className="text-xs text-gray-500">
                   From completed transfers
                 </p>
@@ -194,7 +194,7 @@ export default function DoneeDashboard() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Pending Transfers</p>
-                <p className="text-2xl font-bold text-gray-900">${stats?.pendingRewards.toFixed(2) || '0.00'}</p>
+                <p className="text-2xl font-bold text-gray-900">₱{stats?.pendingRewards.toFixed(2) || '0.00'}</p>
                 <p className="text-xs text-gray-500">
                   Partially sent by donors
                 </p>

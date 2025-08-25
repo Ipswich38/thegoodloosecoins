@@ -234,7 +234,7 @@ export default function PledgeStatusCard({
                           onChange={(e) => setTaskEvidence(e.target.value)}
                           placeholder={task.id === 2 ? 
                             "Example: Exchanged coins at local grocery store coin counter" :
-                            "Example: Transferred $25.47 via mobile banking to recipient"
+                            "Example: Transferred ₱25.47 via mobile banking to recipient"
                           }
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
                           rows={2}

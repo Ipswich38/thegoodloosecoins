@@ -172,7 +172,7 @@ export default function DonorDashboard() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Total Pledged</p>
-                <p className="text-2xl font-bold text-gray-900">${stats?.totalPledged.toFixed(2) || '0.00'}</p>
+                <p className="text-2xl font-bold text-gray-900">₱{stats?.totalPledged.toFixed(2) || '0.00'}</p>
               </div>
             </div>
           </div>
@@ -184,7 +184,7 @@ export default function DonorDashboard() {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Amount Sent</p>
-                <p className="text-2xl font-bold text-gray-900">${stats?.totalAmountSent?.toFixed(2) || '0.00'}</p>
+                <p className="text-2xl font-bold text-gray-900">₱{stats?.totalAmountSent?.toFixed(2) || '0.00'}</p>
                 <p className="text-xs text-gray-500">
                   {stats?.totalPledged ? `${((stats.totalAmountSent || 0) / stats.totalPledged * 100).toFixed(1)}% of pledged` : '0% of pledged'}
                 </p>
