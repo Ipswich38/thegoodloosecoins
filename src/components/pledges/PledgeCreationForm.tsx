@@ -17,10 +17,15 @@ export default function PledgeCreationForm({ onSuccess, onCancel, className = ''
   const [currentStep, setCurrentStep] = useState<FormStep>('amount');
   const [directAmount, setDirectAmount] = useState('');
   const [coinCounts, setCoinCounts] = useState<Partial<CoinCount>>({
-    quarters: 0,
-    dimes: 0,
-    nickels: 0,
-    pennies: 0,
+    twentyPesos: 0,
+    tenPesos: 0,
+    fivePesos: 0,
+    onePeso: 0,
+    fiftyCentavos: 0,
+    twentyFiveCentavos: 0,
+    tenCentavos: 0,
+    fiveCentavos: 0,
+    oneCentavo: 0,
   });
   const [useCoins, setUseCoins] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
