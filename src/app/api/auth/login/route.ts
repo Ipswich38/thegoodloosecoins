@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 export const dynamic = 'force-dynamic';
 
 // Simple access codes for each user (in production, these would be in the database)
-const ACCESS_CODES = {
+const ACCESS_CODES: Record<string, string> = {
   'testdonor': '123456',
   'testdonee': '654321', 
   'admin': '999999'
@@ -33,7 +33,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Check access code
-    if (!ACCESS_CODES[username.toLowerCase()] || ACCESS_CODES[username.toLowerCase()] !== passcode) {
+    const lowerUsername = username.toLowerCase();
+    const expectedPasscode = ACCESS_CODES[lowerUsername];
+    
+    if (!expectedPasscode || expectedPasscode !== passcode) {
       return NextResponse.json(
         { success: false, error: 'Invalid username or access code' },
         { status: 401 }
