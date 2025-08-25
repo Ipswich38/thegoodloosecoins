@@ -111,13 +111,18 @@ export async function POST(request: NextRequest) {
     return response;
 
   } catch (error) {
-    console.error('Signup error:', error);
+    console.error('Signup error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : undefined,
+      error: error
+    });
     
     // Handle specific database connection errors
     if (error instanceof Error) {
       if (error.message.includes('connect') || error.message.includes('timeout')) {
         return NextResponse.json(
-          { success: false, error: 'Database connection failed. Please try again.' },
+          { success: false, error: 'Database connection failed. Please try again.', details: error.message },
           { status: 503 }
         );
       }
@@ -128,10 +133,16 @@ export async function POST(request: NextRequest) {
           { status: 409 }
         );
       }
+      
+      // Return the actual error message for debugging
+      return NextResponse.json(
+        { success: false, error: 'Account creation failed. Please try again.', details: error.message },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json(
-      { success: false, error: 'Account creation failed. Please try again.' },
+      { success: false, error: 'Account creation failed. Please try again.', details: 'Unknown error type' },
       { status: 500 }
     );
   }
