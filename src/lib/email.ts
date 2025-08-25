@@ -92,7 +92,7 @@ export function generateOTPEmail(data: OTPEmailData): { subject: string; html: s
       </div>
       
       <div class="footer">
-        <p>© 2024 The Good Loose Coins. All rights reserved.</p>
+        <p>© 2025 The Good Loose Coins. All rights reserved.</p>
         <p>Making the world better, one coin at a time.</p>
       </div>
     </body>
@@ -112,7 +112,7 @@ ${type === 'signup' ? 'Welcome to The Good Loose Coins community!' : ''}
 
 If you didn't request this code, please ignore this email.
 
-© 2024 The Good Loose Coins
+© 2025 The Good Loose Coins
 Making the world better, one coin at a time.
   `;
   
