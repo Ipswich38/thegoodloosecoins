@@ -200,7 +200,7 @@ export default function PledgeCreationForm({ onSuccess, onCancel, className = ''
             </div>
             
             {(Object.keys(coinCounts) as Array<keyof Omit<CoinCount, 'total'>>).map((coinType) => (
-              <div key={coinType} className="flex items-center justify-between">
+              <div key={coinType} className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0 p-3 bg-gray-50 rounded-lg">
                 <label className="text-sm font-medium text-gray-700">
                   {getCoinDisplayName(coinType)}
                 </label>
@@ -211,7 +211,7 @@ export default function PledgeCreationForm({ onSuccess, onCancel, className = ''
                   min="0"
                   max="1000"
                   placeholder="0"
-                  className="w-20 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent text-center"
+                  className="w-full sm:w-24 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent text-center"
                 />
               </div>
             ))}
@@ -244,17 +244,17 @@ export default function PledgeCreationForm({ onSuccess, onCancel, className = ''
         )}
       </div>
 
-      <div className="flex justify-between">
+      <div className="flex flex-col sm:flex-row justify-between space-y-3 sm:space-y-0 sm:space-x-4">
         <button
           onClick={onCancel}
-          className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
+          className="w-full sm:w-auto px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
         >
           Cancel
         </button>
         <button
           onClick={handleAmountNext}
           disabled={calculatedAmount <= 0}
-          className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed font-medium flex items-center space-x-2"
+          className="w-full sm:w-auto px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed font-medium flex items-center justify-center space-x-2"
         >
           <span>Next</span>
           <ArrowRight className="h-4 w-4" />
@@ -273,12 +273,12 @@ export default function PledgeCreationForm({ onSuccess, onCancel, className = ''
 
       <div className="space-y-4 border border-gray-200 rounded-lg p-6">
         {(Object.keys(coinCounts) as Array<keyof Omit<CoinCount, 'total'>>).map((coinType) => (
-          <div key={coinType} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-            <div>
-              <label className="text-sm font-medium text-gray-900">
+          <div key={coinType} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-gray-50 rounded-lg space-y-3 sm:space-y-0">
+            <div className="flex-1">
+              <label className="text-sm font-medium text-gray-900 block">
                 {getCoinDisplayName(coinType)}
               </label>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 mt-1">
                 {coinCounts[coinType] || 0} × {formatCurrency(COIN_VALUES[coinType])} = {formatCurrency((coinCounts[coinType] || 0) * COIN_VALUES[coinType])}
               </p>
             </div>
@@ -289,7 +289,7 @@ export default function PledgeCreationForm({ onSuccess, onCancel, className = ''
               min="0"
               max="1000"
               placeholder="0"
-              className="w-24 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent text-center"
+              className="w-full sm:w-28 px-3 py-3 sm:py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent text-center text-lg sm:text-base"
             />
           </div>
         ))}
@@ -304,10 +304,10 @@ export default function PledgeCreationForm({ onSuccess, onCancel, className = ''
         </div>
       </div>
 
-      <div className="flex justify-between">
+      <div className="flex flex-col sm:flex-row justify-between space-y-3 sm:space-y-0 sm:space-x-4">
         <button
           onClick={() => setCurrentStep('amount')}
-          className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium flex items-center space-x-2"
+          className="w-full sm:w-auto px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium flex items-center justify-center space-x-2"
         >
           <ArrowLeft className="h-4 w-4" />
           <span>Back</span>
@@ -315,7 +315,7 @@ export default function PledgeCreationForm({ onSuccess, onCancel, className = ''
         <button
           onClick={handleCoinsNext}
           disabled={calculateCoinTotal(coinCounts) <= 0}
-          className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed font-medium flex items-center space-x-2"
+          className="w-full sm:w-auto px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed font-medium flex items-center justify-center space-x-2"
         >
           <span>Next</span>
           <ArrowRight className="h-4 w-4" />
@@ -343,12 +343,12 @@ export default function PledgeCreationForm({ onSuccess, onCancel, className = ''
         {useCoins && calculateCoinTotal(coinCounts) > 0 && (
           <div className="pt-4 border-t border-gray-200">
             <h4 className="text-sm font-medium text-gray-700 mb-3">Coin Breakdown:</h4>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
               {(Object.keys(coinCounts) as Array<keyof Omit<CoinCount, 'total'>>)
                 .filter(coinType => (coinCounts[coinType] || 0) > 0)
                 .map((coinType) => (
-                  <div key={coinType} className="flex justify-between text-sm">
-                    <span className="text-gray-600 capitalize">{coinType}:</span>
+                  <div key={coinType} className="flex justify-between text-sm bg-gray-50 p-2 rounded">
+                    <span className="text-gray-600">{getCoinDisplayName(coinType)}:</span>
                     <span className="font-medium">{coinCounts[coinType]} × {formatCurrency(COIN_VALUES[coinType])}</span>
                   </div>
                 ))}
@@ -387,11 +387,11 @@ export default function PledgeCreationForm({ onSuccess, onCancel, className = ''
         </div>
       )}
 
-      <div className="flex justify-between">
+      <div className="flex flex-col sm:flex-row justify-between space-y-3 sm:space-y-0 sm:space-x-4">
         <button
           onClick={() => setCurrentStep(useCoins ? 'amount' : 'coins')}
           disabled={isSubmitting}
-          className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed font-medium flex items-center space-x-2"
+          className="w-full sm:w-auto px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed font-medium flex items-center justify-center space-x-2"
         >
           <ArrowLeft className="h-4 w-4" />
           <span>Back</span>
@@ -399,7 +399,7 @@ export default function PledgeCreationForm({ onSuccess, onCancel, className = ''
         <button
           onClick={handleSubmit}
           disabled={isSubmitting || calculatedAmount <= 0}
-          className="px-8 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed font-medium flex items-center space-x-2"
+          className="w-full sm:w-auto px-8 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed font-medium flex items-center justify-center space-x-2"
         >
           {isSubmitting ? (
             <>
@@ -419,7 +419,7 @@ export default function PledgeCreationForm({ onSuccess, onCancel, className = ''
 
   return (
     <div className={`bg-white rounded-lg shadow-lg ${className}`}>
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         {currentStep === 'amount' && renderAmountStep()}
         {currentStep === 'coins' && renderCoinsStep()}
         {currentStep === 'confirmation' && renderConfirmationStep()}

@@ -164,55 +164,55 @@ export default function DonorDashboard() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
+          <div className="bg-white rounded-lg shadow p-4 lg:p-6">
             <div className="flex items-center">
-              <div className="p-2 bg-primary-100 rounded-lg">
-                <DollarSign className="h-6 w-6 text-primary-600" />
+              <div className="p-2 bg-primary-100 rounded-lg flex-shrink-0">
+                <DollarSign className="h-5 w-5 lg:h-6 lg:w-6 text-primary-600" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Pledged</p>
-                <p className="text-2xl font-bold text-gray-900">₱{stats?.totalPledged.toFixed(2) || '0.00'}</p>
+              <div className="ml-3 lg:ml-4 min-w-0">
+                <p className="text-xs lg:text-sm font-medium text-gray-600">Total Pledged</p>
+                <p className="text-lg lg:text-2xl font-bold text-gray-900 truncate">₱{stats?.totalPledged.toFixed(2) || '0.00'}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-4 lg:p-6">
             <div className="flex items-center">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <TrendingUp className="h-6 w-6 text-green-600" />
+              <div className="p-2 bg-green-100 rounded-lg flex-shrink-0">
+                <TrendingUp className="h-5 w-5 lg:h-6 lg:w-6 text-green-600" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Amount Sent</p>
-                <p className="text-2xl font-bold text-gray-900">₱{stats?.totalAmountSent?.toFixed(2) || '0.00'}</p>
-                <p className="text-xs text-gray-500">
+              <div className="ml-3 lg:ml-4 min-w-0">
+                <p className="text-xs lg:text-sm font-medium text-gray-600">Amount Sent</p>
+                <p className="text-lg lg:text-2xl font-bold text-gray-900 truncate">₱{stats?.totalAmountSent?.toFixed(2) || '0.00'}</p>
+                <p className="text-xs text-gray-500 truncate">
                   {stats?.totalPledged ? `${((stats.totalAmountSent || 0) / stats.totalPledged * 100).toFixed(1)}% of pledged` : '0% of pledged'}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-4 lg:p-6">
             <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Users className="h-6 w-6 text-blue-600" />
+              <div className="p-2 bg-blue-100 rounded-lg flex-shrink-0">
+                <Users className="h-5 w-5 lg:h-6 lg:w-6 text-blue-600" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">People Helped</p>
-                <p className="text-2xl font-bold text-gray-900">{stats?.peopleHelped || 0}</p>
+              <div className="ml-3 lg:ml-4 min-w-0">
+                <p className="text-xs lg:text-sm font-medium text-gray-600">People Helped</p>
+                <p className="text-lg lg:text-2xl font-bold text-gray-900">{stats?.peopleHelped || 0}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-4 lg:p-6">
             <div className="flex items-center">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <Heart className="h-6 w-6 text-yellow-600" />
+              <div className="p-2 bg-yellow-100 rounded-lg flex-shrink-0">
+                <Heart className="h-5 w-5 lg:h-6 lg:w-6 text-yellow-600" />
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Impact Points</p>
-                <p className="text-2xl font-bold text-gray-900">{stats?.totalPoints.toLocaleString() || '0'}</p>
-                <p className="text-xs text-gray-500">
+              <div className="ml-3 lg:ml-4 min-w-0">
+                <p className="text-xs lg:text-sm font-medium text-gray-600">Impact Points</p>
+                <p className="text-lg lg:text-2xl font-bold text-gray-900">{stats?.totalPoints.toLocaleString() || '0'}</p>
+                <p className="text-xs text-gray-500 truncate">
                   Avg completion: {stats?.averageCompletion?.toFixed(1) || '0'}%
                 </p>
               </div>

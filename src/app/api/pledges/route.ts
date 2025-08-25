@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { createClient } from '@/lib/supabase';
 // Force this route to be dynamic
 export const dynamic = 'force-dynamic';
 import { prisma } from '@/lib/prisma';
@@ -15,12 +14,14 @@ import {
   PledgeError 
 } from '@/types/pledge';
 
-async function getCurrentUser(supabase: any) {
-  const { data: { user }, error } = await supabase.auth.getUser();
-  if (error || !user) return null;
+async function getCurrentUser() {
+  const cookieStore = await cookies();
+  const userId = cookieStore.get('user-id')?.value;
+  
+  if (!userId) return null;
 
   const dbUser = await prisma.user.findUnique({
-    where: { email: user.email },
+    where: { id: userId },
   });
 
   return dbUser;
@@ -38,7 +39,7 @@ function validatePledgeAmount(amount: number): PledgeError | null {
   if (amount < PLEDGE_VALIDATION.amount.min) {
     return {
       code: 'INVALID_AMOUNT',
-      message: `Amount must be at least $${PLEDGE_VALIDATION.amount.min}`,
+      message: `Amount must be at least ₱${PLEDGE_VALIDATION.amount.min}`,
       field: 'amount'
     };
   }
@@ -46,7 +47,7 @@ function validatePledgeAmount(amount: number): PledgeError | null {
   if (amount > PLEDGE_VALIDATION.amount.max) {
     return {
       code: 'INVALID_AMOUNT',
-      message: `Amount cannot exceed $${PLEDGE_VALIDATION.amount.max}`,
+      message: `Amount cannot exceed ₱${PLEDGE_VALIDATION.amount.max}`,
       field: 'amount'
     };
   }
@@ -79,8 +80,7 @@ function calculatePledgePoints(amount: number): number {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createClient();
-    const user = await getCurrentUser(supabase);
+    const user = await getCurrentUser();
 
     if (!user) {
       return NextResponse.json(
@@ -177,8 +177,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createClient();
-    const user = await getCurrentUser(supabase);
+    const user = await getCurrentUser();
 
     if (!user) {
       return NextResponse.json(

@@ -1,16 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase';
+import { cookies } from 'next/headers';
 import { prisma } from '@/lib/prisma';
 // Force this route to be dynamic
 export const dynamic = 'force-dynamic';
 import { PledgeStats, DoneeStats } from '@/types/pledge';
 
-async function getCurrentUser(supabase: any) {
-  const { data: { user }, error } = await supabase.auth.getUser();
-  if (error || !user) return null;
+async function getCurrentUser() {
+  const cookieStore = await cookies();
+  const userId = cookieStore.get('user-id')?.value;
+  
+  if (!userId) return null;
 
   const dbUser = await prisma.user.findUnique({
-    where: { email: user.email },
+    where: { id: userId },
   });
 
   return dbUser;
@@ -136,8 +138,7 @@ async function getDoneeStats(userId: string): Promise<DoneeStats> {
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createClient();
-    const user = await getCurrentUser(supabase);
+    const user = await getCurrentUser();
 
     if (!user) {
       return NextResponse.json(
