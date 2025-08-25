@@ -99,10 +99,15 @@ export interface PledgeWithTasks extends Pledge {
 }
 
 export interface CoinCount {
-  quarters: number;
-  dimes: number;
-  nickels: number;
-  pennies: number;
+  twentyPesos: number;   // ₱20 coins
+  tenPesos: number;      // ₱10 coins
+  fivePesos: number;     // ₱5 coins
+  onePeso: number;       // ₱1 coins
+  fiftyCentavos: number; // 50 centavos
+  twentyFiveCentavos: number; // 25 centavos
+  tenCentavos: number;   // 10 centavos
+  fiveCentavos: number;  // 5 centavos
+  oneCentavo: number;    // 1 centavo
   total: number;
 }
 
