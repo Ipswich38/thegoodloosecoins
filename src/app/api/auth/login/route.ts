@@ -1,31 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
-// Test accounts with 6-digit passcodes
-const TEST_ACCOUNTS = [
-  {
-    id: 'donor_001',
-    username: 'testdonor',
-    email: 'donor@test.com',
-    passcode: '123456',
-    type: 'DONOR'
-  },
-  {
-    id: 'donee_001', 
-    username: 'testdonee',
-    email: 'donee@test.com',
-    passcode: '654321',
-    type: 'DONEE'
-  },
-  {
-    id: 'admin_001',
-    username: 'admin',
-    email: 'admin@test.com', 
-    passcode: '999999',
-    type: 'DONOR'
-  }
-];
+// Simple access codes for each user (in production, these would be in the database)
+const ACCESS_CODES = {
+  'testdonor': '123456',
+  'testdonee': '654321', 
+  'admin': '999999'
+};
 
 export async function POST(request: NextRequest) {
   try {
@@ -49,20 +32,39 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find matching account
-    const account = TEST_ACCOUNTS.find(acc => 
-      acc.username.toLowerCase() === username.toLowerCase() && 
-      acc.passcode === passcode
-    );
-
-    if (!account) {
+    // Check access code
+    if (!ACCESS_CODES[username.toLowerCase()] || ACCESS_CODES[username.toLowerCase()] !== passcode) {
       return NextResponse.json(
-        { success: false, error: 'Invalid username or passcode' },
+        { success: false, error: 'Invalid username or access code' },
         { status: 401 }
       );
     }
 
-    console.log('Login successful for:', account.username);
+    // Find user in database
+    const user = await prisma.user.findFirst({
+      where: {
+        username: {
+          equals: username,
+          mode: 'insensitive'
+        }
+      },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        type: true,
+        createdAt: true
+      }
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'User not found in database' },
+        { status: 401 }
+      );
+    }
+
+    console.log('Login successful for:', user.username);
 
     // Create session
     const sessionToken = crypto.randomUUID();
@@ -72,10 +74,10 @@ export async function POST(request: NextRequest) {
       success: true,
       message: 'Login successful!',
       user: {
-        id: account.id,
-        username: account.username,
-        email: account.email,
-        type: account.type
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        type: user.type
       }
     });
 
@@ -88,7 +90,7 @@ export async function POST(request: NextRequest) {
       path: '/'
     });
 
-    response.cookies.set('user-id', account.id, {
+    response.cookies.set('user-id', user.id, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -96,7 +98,7 @@ export async function POST(request: NextRequest) {
       path: '/'
     });
 
-    response.cookies.set('user-type', account.type, {
+    response.cookies.set('user-type', user.type, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -108,6 +110,16 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Login error:', error);
+    
+    // Handle specific database connection errors
+    if (error instanceof Error) {
+      if (error.message.includes('connect') || error.message.includes('timeout')) {
+        return NextResponse.json(
+          { success: false, error: 'Database connection failed. Please try again.' },
+          { status: 503 }
+        );
+      }
+    }
     
     return NextResponse.json(
       { success: false, error: 'Login failed. Please try again.' },
