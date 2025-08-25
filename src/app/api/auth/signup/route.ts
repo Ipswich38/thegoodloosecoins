@@ -34,6 +34,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Test database connection first
+    console.log('Testing database connection...');
+    
     // Check if user already exists
     const existingUser = await prisma.user.findFirst({
       where: {
@@ -43,6 +46,8 @@ export async function POST(request: NextRequest) {
         ]
       }
     });
+    
+    console.log('Database query successful. Existing user check completed.');
 
     if (existingUser) {
       const field = existingUser.email === email ? 'Email' : 'Username';
