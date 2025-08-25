@@ -6,14 +6,14 @@ import Link from 'next/link';
 import { Eye, EyeOff, Coins, AlertCircle, Loader2 } from 'lucide-react';
 
 interface FormData {
-  email: string;
-  password: string;
+  username: string;
+  passcode: string;
 }
 
 export default function LoginPage() {
   const [formData, setFormData] = useState<FormData>({
-    email: '',
-    password: '',
+    username: '',
+    passcode: '',
   });
   const [errors, setErrors] = useState<any>({});
   const [showPassword, setShowPassword] = useState(false);
@@ -24,12 +24,14 @@ export default function LoginPage() {
   const validateForm = (): boolean => {
     const newErrors: any = {};
 
-    if (!formData.email) {
-      newErrors.email = 'Email or username is required';
+    if (!formData.username) {
+      newErrors.username = 'Username is required';
     }
 
-    if (!formData.password) {
-      newErrors.password = 'Password is required';
+    if (!formData.passcode) {
+      newErrors.passcode = '6-digit passcode is required';
+    } else if (!/^\d{6}$/.test(formData.passcode)) {
+      newErrors.passcode = 'Passcode must be exactly 6 digits';
     }
 
     setErrors(newErrors);
@@ -105,8 +107,16 @@ export default function LoginPage() {
           </Link>
           <h2 className="text-3xl font-bold text-gray-900">Welcome back</h2>
           <p className="mt-2 text-gray-600">
-            Sign in to your account to continue making a difference
+            Enter your username and 6-digit passcode
           </p>
+          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-800 font-medium">Test Accounts:</p>
+            <div className="text-xs text-blue-600 mt-1 space-y-1">
+              <div>👤 testdonor / 123456 (Donor)</div>
+              <div>👤 testdonee / 654321 (Donee)</div>
+              <div>👤 admin / 999999 (Admin)</div>
+            </div>
+          </div>
         </div>
 
         {/* Form */}
@@ -120,45 +130,46 @@ export default function LoginPage() {
           )}
 
           <div className="space-y-4">
-            {/* Email or Username */}
+            {/* Username */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email or Username
+              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+                Username
               </label>
               <input
-                id="email"
-                name="email"
+                id="username"
+                name="username"
                 type="text"
-                autoComplete="username email"
-                value={formData.email}
+                autoComplete="username"
+                value={formData.username}
                 onChange={handleInputChange}
                 className={`w-full px-3 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
-                  errors.email ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  errors.username ? 'border-red-300 bg-red-50' : 'border-gray-300'
                 }`}
-                placeholder="Enter your email or username"
+                placeholder="Enter your username"
               />
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+              {errors.username && (
+                <p className="mt-1 text-sm text-red-600">{errors.username}</p>
               )}
             </div>
 
-            {/* Password */}
+            {/* 6-Digit Passcode */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                Password
+              <label htmlFor="passcode" className="block text-sm font-medium text-gray-700 mb-1">
+                6-Digit Passcode
               </label>
               <div className="relative">
                 <input
-                  id="password"
-                  name="password"
+                  id="passcode"
+                  name="passcode"
                   type={showPassword ? 'text' : 'password'}
-                  autoComplete="current-password"
-                  value={formData.password}
+                  autoComplete="off"
+                  value={formData.passcode}
                   onChange={handleInputChange}
-                  className={`w-full px-3 py-2 pr-10 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
-                    errors.password ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  maxLength={6}
+                  className={`w-full px-3 py-2 pr-10 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-center text-2xl tracking-[0.5em] font-mono ${
+                    errors.passcode ? 'border-red-300 bg-red-50' : 'border-gray-300'
                   }`}
-                  placeholder="Enter your password"
+                  placeholder="••••••"
                 />
                 <button
                   type="button"
@@ -172,8 +183,8 @@ export default function LoginPage() {
                   )}
                 </button>
               </div>
-              {errors.password && (
-                <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+              {errors.passcode && (
+                <p className="mt-1 text-sm text-red-600">{errors.passcode}</p>
               )}
             </div>
           </div>
@@ -189,16 +200,10 @@ export default function LoginPage() {
           </button>
         </form>
 
-        {/* Sign Up Link */}
+        {/* Info */}
         <div className="text-center">
-          <p className="text-gray-600">
-            Don't have an account?{' '}
-            <Link
-              href="/signup"
-              className="font-medium text-primary-600 hover:text-primary-500 transition-colors"
-            >
-              Sign up for free
-            </Link>
+          <p className="text-sm text-gray-500">
+            Use the test accounts above to access the dashboard
           </p>
         </div>
       </div>

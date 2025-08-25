@@ -128,10 +128,10 @@ export default function Home() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link
-                href="/signup"
+                href="/login"
                 className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-colors flex items-center gap-2 shadow-lg"
               >
-                Get Started
+                Sign In
                 <ArrowRight className="h-5 w-5" />
               </Link>
               <a
@@ -322,10 +322,10 @@ export default function Home() {
             
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-12">
               <Link
-                href="/signup"
+                href="/login"
                 className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-colors flex items-center gap-2 shadow-lg"
               >
-                Get Started Now
+                Sign In Now
                 <ArrowRight className="h-5 w-5" />
               </Link>
               <a
