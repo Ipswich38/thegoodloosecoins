@@ -14,6 +14,7 @@ import {
   Globe,
   Award
 } from 'lucide-react';
+import { formatCurrency } from '@/lib/coins';
 
 interface GlobalStats {
   totalUsers: number;
@@ -67,7 +68,7 @@ export default function Home() {
   const displayStats = [
     { 
       label: 'Total Pledged', 
-      value: isLoading ? '...' : `$${stats?.totalAmountPledged?.toFixed(2) || '0.00'}`, 
+      value: isLoading ? '...' : formatCurrency(stats?.totalAmountPledged || 0), 
       icon: Heart 
     },
     { 

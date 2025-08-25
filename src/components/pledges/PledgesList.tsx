@@ -186,7 +186,7 @@ export default function PledgesList({ userType, onPledgeUpdate, className = '' }
                   type="number"
                   value={filters.minAmount || ''}
                   onChange={(e) => handleFilterChange('minAmount', parseFloat(e.target.value))}
-                  placeholder="$0.00"
+                  placeholder="₱0.00"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
                 />
               </div>
