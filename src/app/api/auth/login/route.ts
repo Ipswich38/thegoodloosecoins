@@ -122,6 +122,18 @@ export async function POST(request: NextRequest) {
           { status: 503 }
         );
       }
+      
+      // Log the specific error for debugging
+      console.error('Detailed login error:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
+      
+      return NextResponse.json(
+        { success: false, error: `Login failed: ${error.message}` },
+        { status: 500 }
+      );
     }
     
     return NextResponse.json(
