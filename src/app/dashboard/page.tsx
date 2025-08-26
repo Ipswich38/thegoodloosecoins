@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -15,6 +15,8 @@ export default function DashboardPage() {
       console.log('🏠 MAIN DASHBOARD - Checking authentication and redirecting...');
       
       try {
+        const supabase = createClient();
+        
         // Check if user has a session with Supabase
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         

@@ -2,7 +2,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowRight, Coins, Shield, TrendingUp, Users, Eye, EyeOff, Loader2, AlertCircle, Calendar, User, Mail, Lock } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
 
 interface AuthFormData {
   email: string;
@@ -138,42 +138,65 @@ function HeroContent() {
     setAuthErrors({});
 
     try {
-      const response = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const supabase = createClient();
+      
+      // Sign up with Supabase directly
+      const { data, error } = await supabase.auth.signUp({
+        email: signupData.email,
+        password: signupData.password,
+        options: {
+          data: {
+            username: signupData.username,
+            birth_year: parseInt(signupData.birthYear),
+            user_type: signupData.userType,
+          },
         },
-        body: JSON.stringify({
-          email: signupData.email,
-          username: signupData.username,
-          birthYear: parseInt(signupData.birthYear),
-          password: signupData.password,
-          userType: signupData.userType,
-        }),
       });
 
-      const data = await response.json();
+      if (error) {
+        console.error('❌ Signup error:', error);
+        setAuthErrors({ 
+          general: error.message || 'Signup failed. Please try again.' 
+        });
+        return;
+      }
 
-      if (data.success) {
+      if (data.user) {
+        // Create user profile in our database
+        const { error: profileError } = await supabase
+          .from('users')
+          .insert({
+            id: data.user.id,
+            username: signupData.username,
+            email: signupData.email,
+            type: signupData.userType,
+            birth_year: parseInt(signupData.birthYear),
+          });
+
+        if (profileError) {
+          console.error('❌ Profile creation error:', profileError);
+        }
+
+        // Initialize social impact points
+        const { error: pointsError } = await supabase
+          .from('social_impact_points')
+          .insert({
+            user_id: data.user.id,
+            points: 0,
+          });
+
+        if (pointsError) {
+          console.error('⚠️ Points initialization error:', pointsError);
+        }
+
         setSignupSuccess(true);
         console.log('🎉 Signup successful, starting redirect timer...');
-        
-        // Set the session in Supabase client if it exists
-        if (data.session) {
-          console.log('🔗 Setting Supabase session...');
-          await supabase.auth.setSession(data.session);
-          console.log('✅ Session set successfully');
-        }
         
         // Wait a moment before redirecting to show the success animation
         setTimeout(() => {
           console.log('⏰ Redirecting to dashboard...');
           router.push('/dashboard');
         }, 3000); // 3 second delay for the animation
-      } else {
-        setAuthErrors({ 
-          general: data.error || 'Signup failed. Please try again.' 
-        });
       }
     } catch (error) {
       console.error('Signup error:', error);
@@ -196,31 +219,25 @@ function HeroContent() {
     setAuthErrors({});
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: loginData.email,
-          password: loginData.password,
-        }),
+      const supabase = createClient();
+      
+      // Sign in with Supabase directly
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: loginData.email,
+        password: loginData.password,
       });
 
-      const data = await response.json();
-
-      if (data.success) {
-        // Set the session in Supabase client if it exists
-        if (data.session) {
-          console.log('🔗 Setting login session...');
-          await supabase.auth.setSession(data.session);
-          console.log('✅ Login session set successfully');
-        }
-        router.push('/dashboard');
-      } else {
+      if (error) {
+        console.error('❌ Login error:', error);
         setAuthErrors({ 
-          general: data.error || 'Login failed. Please try again.' 
+          general: error.message || 'Login failed. Please try again.' 
         });
+        return;
+      }
+
+      if (data.user) {
+        console.log('✅ Login successful');
+        router.push('/dashboard');
       }
     } catch (error) {
       console.error('Login error:', error);
