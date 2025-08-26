@@ -13,6 +13,8 @@ export async function GET(request: NextRequest) {
     console.log('🍪 Session cookies:', {
       hasAuthToken: !!authToken,
       hasRefreshToken: !!refreshToken,
+      authTokenLength: authToken?.length || 0,
+      refreshTokenLength: refreshToken?.length || 0,
     });
 
     if (!authToken) {

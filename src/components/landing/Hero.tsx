@@ -155,8 +155,10 @@ function HeroContent() {
 
       if (data.success) {
         setSignupSuccess(true);
+        console.log('🎉 Signup successful, starting redirect timer...');
         // Wait a moment before redirecting to show the success animation
         setTimeout(() => {
+          console.log('⏰ Redirecting to dashboard...');
           router.push('/dashboard');
         }, 3000); // 3 second delay for the animation
       } else {

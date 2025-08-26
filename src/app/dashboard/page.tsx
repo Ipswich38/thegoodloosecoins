@@ -13,6 +13,9 @@ export default function DashboardPage() {
     const redirectToUserDashboard = async () => {
       console.log('🏠 MAIN DASHBOARD - Checking authentication and redirecting...');
       
+      // Wait a moment to allow cookies to be set properly
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       try {
         // Try direct session check first, then fallback to Supabase auth
         console.log('📡 Trying /api/auth/check-session...');
