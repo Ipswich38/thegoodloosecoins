@@ -5,14 +5,14 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, name, birthYear } = await request.json();
+    const { email, username, birthYear } = await request.json();
 
-    console.log('🔐 Password reset request:', { email, name, birthYear });
+    console.log('🔐 Password reset request:', { email, username, birthYear });
 
     // Validate input
-    if (!email || !name || !birthYear) {
+    if (!email || !username || !birthYear) {
       return NextResponse.json(
-        { success: false, error: 'Email, name, and birth year are required' },
+        { success: false, error: 'Email, username, and birth year are required' },
         { status: 400 }
       );
     }
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       .from('users')
       .select('email, username, birth_year')
       .eq('email', email)
-      .eq('username', name)
+      .eq('username', username)
       .eq('birth_year', parseInt(birthYear))
       .single();
 

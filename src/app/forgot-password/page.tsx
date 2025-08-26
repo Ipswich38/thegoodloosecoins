@@ -6,7 +6,7 @@ import Link from 'next/link';
 export default function ForgotPasswordPage() {
   const [formData, setFormData] = useState({
     email: '',
-    name: '',
+    username: '',
     birthYear: '',
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -28,11 +28,11 @@ export default function ForgotPasswordPage() {
       newErrors.email = 'Please enter a valid email address';
     }
 
-    // Name validation
-    if (!formData.name) {
-      newErrors.name = 'Name is required';
-    } else if (formData.name.length < 2) {
-      newErrors.name = 'Name must be at least 2 characters';
+    // Username validation
+    if (!formData.username) {
+      newErrors.username = 'Username is required';
+    } else if (formData.username.length < 2) {
+      newErrors.username = 'Username must be at least 2 characters';
     }
 
     // Birth year validation
@@ -65,7 +65,7 @@ export default function ForgotPasswordPage() {
         },
         body: JSON.stringify({
           email: formData.email,
-          name: formData.name,
+          username: formData.username,
           birthYear: parseInt(formData.birthYear),
         }),
       });
@@ -153,26 +153,26 @@ export default function ForgotPasswordPage() {
             {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
           </div>
 
-          {/* Name Field */}
+          {/* Username Field */}
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-              Name (as registered)
+            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+              Username (as registered)
             </label>
             <div className="relative">
               <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 type="text"
-                id="name"
-                name="name"
-                value={formData.name}
+                id="username"
+                name="username"
+                value={formData.username}
                 onChange={handleInputChange}
                 className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
-                  errors.name ? 'border-red-500' : 'border-gray-300'
+                  errors.username ? 'border-red-500' : 'border-gray-300'
                 }`}
-                placeholder="Your full name"
+                placeholder="Your username"
               />
             </div>
-            {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+            {errors.username && <p className="text-red-500 text-sm mt-1">{errors.username}</p>}
           </div>
 
           {/* Birth Year Field */}

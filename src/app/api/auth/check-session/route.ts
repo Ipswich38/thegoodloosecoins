@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
         .from('users')
         .insert({
           id: user.id,
-          username: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+          username: user.user_metadata?.username || user.email?.split('@')[0] || 'User',
           email: user.email,
           type: user.user_metadata?.user_type || 'DONOR',
           birth_year: user.user_metadata?.birth_year || null,

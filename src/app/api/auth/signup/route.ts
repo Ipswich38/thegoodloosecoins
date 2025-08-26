@@ -5,12 +5,12 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, name, birthYear, password, userType } = await request.json();
+    const { email, username, birthYear, password, userType } = await request.json();
 
-    console.log('🔐 Creating new user with enhanced auth:', { email, name, birthYear, userType });
+    console.log('🔐 Creating new user with enhanced auth:', { email, username, birthYear, userType });
 
     // Validate input
-    if (!email || !name || !birthYear || !password || !userType) {
+    if (!email || !username || !birthYear || !password || !userType) {
       return NextResponse.json(
         { success: false, error: 'All fields are required' },
         { status: 400 }
@@ -32,10 +32,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Name validation
-    if (name.length < 2 || name.length > 50) {
+    // Username validation
+    if (username.length < 2 || username.length > 50) {
       return NextResponse.json(
-        { success: false, error: 'Name must be between 2 and 50 characters' },
+        { success: false, error: 'Username must be between 2 and 50 characters' },
         { status: 400 }
       );
     }
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
       password,
       options: {
         data: {
-          name,
+          username,
           birth_year: birthYear,
           user_type: userType,
         },
@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
       .from('users')
       .insert({
         id: authData.user.id,
-        username: name, // Use name as display name
+        username: username,
         email: email,
         type: userType,
         birth_year: birthYear,
@@ -173,7 +173,7 @@ export async function POST(request: NextRequest) {
       message: 'Account created successfully! Welcome to The Good Loose Coins!',
       user: {
         id: authData.user.id,
-        username: name,
+        username: username,
         email: email,
         type: userType,
         birth_year: birthYear,

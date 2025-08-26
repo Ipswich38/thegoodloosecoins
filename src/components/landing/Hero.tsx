@@ -144,7 +144,7 @@ function HeroContent() {
         },
         body: JSON.stringify({
           email: signupData.email,
-          name: signupData.username,
+          username: signupData.username,
           birthYear: parseInt(signupData.birthYear),
           password: signupData.password,
           userType: signupData.userType,
