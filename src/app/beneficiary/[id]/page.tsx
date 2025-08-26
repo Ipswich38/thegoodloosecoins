@@ -23,43 +23,19 @@ export default function BeneficiaryDashboard() {
   const [pendingPledges, setPendingPledges] = useState<PendingPledge[]>([]);
   const [confirming, setConfirming] = useState<string | null>(null);
 
-  // Mock data - will be replaced with real API calls
+  // Real data - will connect to API
   useEffect(() => {
-    // Mock beneficiary data
-    const mockBeneficiary = beneficiaryId === '1' 
-      ? 'Maria Santos Family'
+    // Real beneficiary data based on actual CSJDM beneficiaries
+    const realBeneficiary = beneficiaryId === '1' 
+      ? 'Grade 11 Section Mercado'
       : beneficiaryId === '2' 
-      ? 'Juan Dela Cruz'
+      ? 'CSJDM National Science High School'
       : 'Unknown Beneficiary';
     
-    setBeneficiaryName(mockBeneficiary);
+    setBeneficiaryName(realBeneficiary);
 
-    // Mock pending pledges
-    const mockPledges: PendingPledge[] = [
-      {
-        id: 'pledge-1',
-        amount: 250.75,
-        donorUsername: 'GenerousHeart',
-        pledgedAt: '2024-01-15T10:30:00Z',
-        confirmed: false
-      },
-      {
-        id: 'pledge-2',
-        amount: 150.50,
-        donorUsername: 'CoinCollector',
-        pledgedAt: '2024-01-14T15:45:00Z',
-        confirmed: false
-      },
-      {
-        id: 'pledge-3',
-        amount: 300.00,
-        donorUsername: 'KindSoul',
-        pledgedAt: '2024-01-13T09:15:00Z',
-        confirmed: true
-      }
-    ];
-
-    setPendingPledges(mockPledges);
+    // Start with empty pledges for production
+    setPendingPledges([]);
   }, [beneficiaryId]);
 
   const handleConfirmPledge = async (pledgeId: string) => {

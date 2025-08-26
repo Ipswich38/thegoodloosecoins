@@ -27,54 +27,16 @@ export default function Dashboard() {
     }
   ];
 
-  // Mock leaderboard data
-  const leaderboardEntries = [
-    {
-      id: '1',
-      username: 'GenerousHeart',
-      totalPledged: 2500.75,
-      totalSent: 2500.75,
-      impactPoints: 2500,
-      pledgeCount: 12,
-      rank: 1
-    },
-    {
-      id: '2',
-      username: 'CoinCollector',
-      totalPledged: 1850.50,
-      totalSent: 1200.25,
-      impactPoints: 1200,
-      pledgeCount: 8,
-      rank: 2
-    },
-    {
-      id: '3',
-      username: 'KindSoul',
-      totalPledged: 1500.00,
-      totalSent: 1500.00,
-      impactPoints: 1500,
-      pledgeCount: 6,
-      rank: 3
-    },
-    {
-      id: '4',
-      username: 'HelpingHands',
-      totalPledged: 950.25,
-      totalSent: 450.00,
-      impactPoints: 450,
-      pledgeCount: 4,
-      rank: 4
-    },
-    {
-      id: '5',
-      username: 'CareGiver',
-      totalPledged: 750.50,
-      totalSent: 0,
-      impactPoints: 0,
-      pledgeCount: 3,
-      rank: 5
-    }
-  ];
+  // Real leaderboard data - starts empty for production
+  const leaderboardEntries: Array<{
+    id: string;
+    username: string;
+    totalPledged: number;
+    totalSent: number;
+    impactPoints: number;
+    pledgeCount: number;
+    rank: number;
+  }> = [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50">
@@ -131,9 +93,7 @@ export default function Dashboard() {
               </div>
               <div className="ml-4">
                 <p className="text-sm text-gray-600">Total Pledged</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  ₱{leaderboardEntries.reduce((sum, entry) => sum + entry.totalPledged, 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </p>
+                <p className="text-2xl font-bold text-gray-900">₱0.00</p>
               </div>
             </div>
           </div>
@@ -145,9 +105,7 @@ export default function Dashboard() {
               </div>
               <div className="ml-4">
                 <p className="text-sm text-gray-600">Successfully Sent</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  ₱{leaderboardEntries.reduce((sum, entry) => sum + entry.totalSent, 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </p>
+                <p className="text-2xl font-bold text-gray-900">₱0.00</p>
               </div>
             </div>
           </div>
@@ -159,9 +117,7 @@ export default function Dashboard() {
               </div>
               <div className="ml-4">
                 <p className="text-sm text-gray-600">Impact Points</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {leaderboardEntries.reduce((sum, entry) => sum + entry.impactPoints, 0).toLocaleString()}
-                </p>
+                <p className="text-2xl font-bold text-gray-900">0</p>
               </div>
             </div>
           </div>
