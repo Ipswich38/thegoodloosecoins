@@ -108,6 +108,12 @@ export default function Header() {
             ) : (
               <div className="flex items-center gap-4">
                 <Link
+                  href="/signup"
+                  className="text-primary-600 hover:text-primary-700 font-medium transition-colors"
+                >
+                  Sign Up
+                </Link>
+                <Link
                   href="/login"
                   className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                 >
@@ -172,6 +178,13 @@ export default function Header() {
                 </div>
               ) : (
                 <div className="space-y-2 pt-4 border-t border-gray-200">
+                  <Link
+                    href="/signup"
+                    className="block text-primary-600 hover:text-primary-700 px-4 py-2 font-medium transition-colors text-center"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Sign Up
+                  </Link>
                   <Link
                     href="/login"
                     className="block bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium transition-colors text-center"
