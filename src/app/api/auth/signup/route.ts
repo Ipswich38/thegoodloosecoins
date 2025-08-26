@@ -5,14 +5,14 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
-    const { username, password, userType } = await request.json();
+    const { email, name, birthYear, password, userType } = await request.json();
 
-    console.log('🔐 Creating new user with simple auth:', { username, userType });
+    console.log('🔐 Creating new user with enhanced auth:', { email, name, birthYear, userType });
 
     // Validate input
-    if (!username || !password || !userType) {
+    if (!email || !name || !birthYear || !password || !userType) {
       return NextResponse.json(
-        { success: false, error: 'Username, password, and user type are required' },
+        { success: false, error: 'All fields are required' },
         { status: 400 }
       );
     }
@@ -24,50 +24,73 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Basic validation
-    if (username.length < 3) {
+    // Email validation
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json(
-        { success: false, error: 'Username must be at least 3 characters' },
+        { success: false, error: 'Please enter a valid email address' },
         { status: 400 }
       );
     }
 
-    if (password.length < 6) {
+    // Name validation
+    if (name.length < 2 || name.length > 50) {
       return NextResponse.json(
-        { success: false, error: 'Password must be at least 6 characters' },
+        { success: false, error: 'Name must be between 2 and 50 characters' },
+        { status: 400 }
+      );
+    }
+
+    // Birth year validation
+    const currentYear = new Date().getFullYear();
+    const age = currentYear - birthYear;
+    if (birthYear < currentYear - 100 || birthYear > currentYear - 13) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid birth year. You must be between 13 and 100 years old' },
+        { status: 400 }
+      );
+    }
+
+    // Password validation
+    if (password.length < 8) {
+      return NextResponse.json(
+        { success: false, error: 'Password must be at least 8 characters' },
+        { status: 400 }
+      );
+    }
+
+    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+      return NextResponse.json(
+        { success: false, error: 'Password must contain at least one uppercase letter, lowercase letter, and number' },
         { status: 400 }
       );
     }
 
     const supabase = createClient();
 
-    // Check if username already exists
+    // Check if email already exists
     const { data: existingUser } = await supabase
       .from('users')
-      .select('username')
-      .eq('username', username)
+      .select('email')
+      .eq('email', email)
       .single();
 
     if (existingUser) {
       return NextResponse.json(
-        { success: false, error: 'Username already taken' },
+        { success: false, error: 'Email already registered' },
         { status: 400 }
       );
     }
 
-    // Create a temporary email for Supabase Auth (we can ask for real email later)
-    const tempEmail = `${username}@temp.thegoodloosecoins.app`;
-
-    // Sign up user with Supabase Auth using temp email
+    // Sign up user with Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: tempEmail,
+      email,
       password,
       options: {
         data: {
-          username,
+          name,
+          birth_year: birthYear,
           user_type: userType,
         },
-        emailRedirectTo: undefined, // Don't send confirmation emails for temp emails
       },
     });
 
@@ -108,9 +131,10 @@ export async function POST(request: NextRequest) {
       .from('users')
       .insert({
         id: authData.user.id,
-        username,
-        email: null, // No email required initially
+        username: name, // Use name as display name
+        email: email,
         type: userType,
+        birth_year: birthYear,
       });
 
     if (profileError) {
@@ -142,9 +166,10 @@ export async function POST(request: NextRequest) {
       message: 'Account created successfully! Welcome to The Good Loose Coins!',
       user: {
         id: authData.user.id,
-        username,
-        email: null,
+        username: name,
+        email: email,
         type: userType,
+        birth_year: birthYear,
       },
     });
 

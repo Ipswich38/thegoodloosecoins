@@ -5,33 +5,38 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
-    const { username, password } = await request.json();
+    const { email, password } = await request.json();
 
-    console.log('🔐 Login attempt with simplified auth:', { username });
+    console.log('🔐 Login attempt with email auth:', { email });
 
     // Validate input
-    if (!username || !password) {
+    if (!email || !password) {
       return NextResponse.json(
-        { success: false, error: 'Username and password are required' },
+        { success: false, error: 'Email and password are required' },
+        { status: 400 }
+      );
+    }
+
+    // Email validation
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return NextResponse.json(
+        { success: false, error: 'Please enter a valid email address' },
         { status: 400 }
       );
     }
 
     const supabase = createClient();
 
-    // Convert username to temporary email format for Supabase Auth
-    const tempEmail = `${username}@temp.thegoodloosecoins.app`;
-
-    // Sign in with Supabase Auth using temp email
+    // Sign in with Supabase Auth using email
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-      email: tempEmail,
+      email,
       password,
     });
 
     if (authError) {
       console.error('❌ Supabase auth error:', authError);
       return NextResponse.json(
-        { success: false, error: 'Invalid username or password' },
+        { success: false, error: 'Invalid email or password' },
         { status: 401 }
       );
     }
@@ -81,7 +86,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    console.log('✅ Login successful for username:', username);
+    console.log('✅ Login successful for user:', userProfile?.username || authData.user.email);
 
     const response = NextResponse.json({
       success: true,
