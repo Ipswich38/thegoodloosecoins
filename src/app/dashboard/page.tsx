@@ -144,7 +144,7 @@ export default function Dashboard() {
                 <TrendingUp className="h-6 w-6 text-purple-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm text-gray-600">Successfully Sent</p>
+                <p className="text-sm text-gray-600">Donations Sent</p>
                 <p className="text-2xl font-bold text-gray-900">
                   ₱{globalStats.totalSent.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>

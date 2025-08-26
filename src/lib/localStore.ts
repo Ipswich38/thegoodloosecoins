@@ -5,6 +5,9 @@ interface User {
   username: string;
   passcode: string;
   createdAt: string;
+  email?: string;
+  phone?: string;
+  location?: string;
 }
 
 interface Pledge {
@@ -16,6 +19,15 @@ interface Pledge {
   pledgedAt: string;
   confirmed: boolean;
   confirmedAt?: string;
+  donationSent: boolean;
+  donationDetails?: {
+    method: 'e-wallet' | 'bank-transfer' | 'cash' | 'other';
+    amount: number;
+    reference: string;
+    date: string;
+    message: string;
+  };
+  sentAt?: string;
 }
 
 interface LeaderboardEntry {
@@ -90,7 +102,8 @@ export function savePledge(
     beneficiaryName,
     amount,
     pledgedAt: new Date().toISOString(),
-    confirmed: false
+    confirmed: false,
+    donationSent: false
   };
   
   pledges[pledgeId] = newPledge;
@@ -194,13 +207,17 @@ export function getGlobalStats() {
   
   const totalPledged = pledges.reduce((sum, pledge) => sum + pledge.amount, 0);
   const totalSent = pledges
+    .filter(pledge => pledge.donationSent)
+    .reduce((sum, pledge) => sum + pledge.amount, 0);
+  const totalConfirmed = pledges
     .filter(pledge => pledge.confirmed)
     .reduce((sum, pledge) => sum + pledge.amount, 0);
-  const totalImpactPoints = Math.floor(totalSent);
+  const totalImpactPoints = Math.floor(totalConfirmed);
   
   return {
     totalPledged,
     totalSent,
+    totalConfirmed,
     totalImpactPoints,
     totalPledges: pledges.length,
     totalUsers: Object.keys(getUsers()).length,
@@ -214,6 +231,56 @@ export function clearAllData(): void {
   localStorage.removeItem(USERS_KEY);
   localStorage.removeItem(PLEDGES_KEY);
   localStorage.removeItem(CURRENT_USER_KEY);
+}
+
+// New functions for donation workflow
+export function getUser(username: string): User | null {
+  const users = getUsers();
+  return users[username] || null;
+}
+
+export function updateUser(username: string, updates: { email?: string; phone?: string; location?: string }): void {
+  const users = getUsers();
+  if (users[username]) {
+    users[username] = { ...users[username], ...updates };
+    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    
+    // Dispatch event for real-time updates
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('tglc-data-changed'));
+    }
+  }
+}
+
+export function addDonationDetails(
+  pledgeId: string, 
+  donationDetails: {
+    method: 'e-wallet' | 'bank-transfer' | 'cash' | 'other';
+    amount: number;
+    reference: string;
+    date: string;
+    message: string;
+  }
+): boolean {
+  const pledges = getPledges();
+  const pledge = pledges[pledgeId];
+  
+  if (pledge) {
+    pledge.donationSent = true;
+    pledge.donationDetails = donationDetails;
+    pledge.sentAt = new Date().toISOString();
+    pledges[pledgeId] = pledge;
+    localStorage.setItem(PLEDGES_KEY, JSON.stringify(pledges));
+    
+    // Dispatch event for real-time updates
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('tglc-data-changed'));
+    }
+    
+    return true;
+  }
+  
+  return false;
 }
 
 export function seedTestData(): void {

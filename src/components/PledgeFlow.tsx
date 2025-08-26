@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Calculator, User, Send, Check } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { calculateCoinTotal, formatCurrency, COIN_VALUES, getCoinDisplayName } from '@/lib/coins';
 import { CoinCount } from '@/types/pledge';
 import UsernameCreation from './UsernameCreation';
@@ -405,15 +406,31 @@ export default function PledgeFlow({ beneficiaries, onPledgeSuccess }: PledgeFlo
             Your pledge of <span className="font-semibold text-primary-600">{formatCurrency(totalAmount)}</span> to{' '}
             <span className="font-semibold">{selectedBeneficiaryData?.name}</span> has been recorded.
           </p>
-          <p className="text-sm text-gray-500 mb-8">
+          <p className="text-sm text-gray-500 mb-6">
             You'll earn {Math.floor(totalAmount)} Impact Points once the beneficiary confirms receipt.
           </p>
-          <button
-            onClick={resetFlow}
-            className="bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 rounded-lg font-medium transition-colors"
-          >
-            Make Another Pledge
-          </button>
+          
+          <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
+            <Link 
+              href={`/donor/${username}`}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors inline-flex items-center justify-center"
+            >
+              <User className="h-4 w-4 mr-2" />
+              View My Account
+            </Link>
+            <button
+              onClick={resetFlow}
+              className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+            >
+              Make Another Pledge
+            </button>
+          </div>
+          
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-md mx-auto">
+            <p className="text-sm text-blue-800">
+              <strong>Next step:</strong> Visit your account to mark donations as "Sent" after you transfer the money to the beneficiary.
+            </p>
+          </div>
         </div>
       )}
     </div>

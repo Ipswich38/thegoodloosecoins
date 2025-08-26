@@ -2,17 +2,28 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { Check, Clock, User, ArrowLeft } from 'lucide-react';
+import { Check, Clock, User, ArrowLeft, Send, Eye } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { formatCurrency } from '@/lib/coins';
+import { getBeneficiaryPledges, confirmPledge } from '@/lib/localStore';
 
-interface PendingPledge {
+interface BeneficiaryPledge {
   id: string;
+  username: string;
   amount: number;
-  donorUsername: string;
   pledgedAt: string;
   confirmed: boolean;
+  confirmedAt?: string;
+  donationSent: boolean;
+  donationDetails?: {
+    method: 'e-wallet' | 'bank-transfer' | 'cash' | 'other';
+    amount: number;
+    reference: string;
+    date: string;
+    message: string;
+  };
+  sentAt?: string;
 }
 
 export default function BeneficiaryDashboard() {
@@ -20,10 +31,15 @@ export default function BeneficiaryDashboard() {
   const beneficiaryId = params.id as string;
   
   const [beneficiaryName, setBeneficiaryName] = useState('');
-  const [pendingPledges, setPendingPledges] = useState<PendingPledge[]>([]);
+  const [pledges, setPledges] = useState<BeneficiaryPledge[]>([]);
   const [confirming, setConfirming] = useState<string | null>(null);
+  const [showDetails, setShowDetails] = useState<string | null>(null);
 
-  // Real data - will connect to API
+  const refreshData = () => {
+    const beneficiaryPledges = getBeneficiaryPledges(beneficiaryId);
+    setPledges(beneficiaryPledges);
+  };
+
   useEffect(() => {
     // Demo beneficiary data for presentation
     const realBeneficiary = beneficiaryId === '1' 
@@ -33,25 +49,33 @@ export default function BeneficiaryDashboard() {
       : 'Unknown Beneficiary';
     
     setBeneficiaryName(realBeneficiary);
+    refreshData();
 
-    // Start with empty pledges for production
-    setPendingPledges([]);
+    // Listen for data changes
+    const handleStorageChange = () => refreshData();
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('tglc-data-changed', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('tglc-data-changed', handleStorageChange);
+    };
   }, [beneficiaryId]);
 
-  const handleConfirmPledge = async (pledgeId: string) => {
+  const handleConfirmReceived = async (pledgeId: string) => {
     setConfirming(pledgeId);
     
-    // Mock API call
+    // Simulate processing time
     await new Promise(resolve => setTimeout(resolve, 1500));
     
-    // Update the pledge as confirmed
-    setPendingPledges(prev => 
-      prev.map(pledge => 
-        pledge.id === pledgeId 
-          ? { ...pledge, confirmed: true }
-          : pledge
-      )
-    );
+    // Confirm the pledge in localStorage
+    const success = confirmPledge(pledgeId);
+    
+    if (success) {
+      refreshData();
+      // Dispatch event for real-time updates
+      window.dispatchEvent(new CustomEvent('tglc-data-changed'));
+    }
     
     setConfirming(null);
   };
@@ -66,16 +90,11 @@ export default function BeneficiaryDashboard() {
     });
   };
 
-  const totalPending = pendingPledges
-    .filter(pledge => !pledge.confirmed)
-    .reduce((sum, pledge) => sum + pledge.amount, 0);
-
-  const totalConfirmed = pendingPledges
-    .filter(pledge => pledge.confirmed)
-    .reduce((sum, pledge) => sum + pledge.amount, 0);
-
-  const pendingCount = pendingPledges.filter(pledge => !pledge.confirmed).length;
-  const confirmedCount = pendingPledges.filter(pledge => pledge.confirmed).length;
+  const sentPledges = pledges.filter(pledge => pledge.donationSent);
+  const receivedPledges = pledges.filter(pledge => pledge.confirmed);
+  const totalPledged = pledges.reduce((sum, pledge) => sum + pledge.amount, 0);
+  const totalReceived = receivedPledges.reduce((sum, pledge) => sum + pledge.amount, 0);
+  const totalSent = sentPledges.reduce((sum, pledge) => sum + pledge.amount, 0);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50">
@@ -104,16 +123,29 @@ export default function BeneficiaryDashboard() {
 
       <div className="max-w-4xl mx-auto px-4 py-8">
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white p-6 rounded-xl shadow-sm border">
+            <div className="flex items-center">
+              <div className="bg-blue-100 p-3 rounded-full">
+                <User className="h-6 w-6 text-blue-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm text-gray-600">Total Pledgers</p>
+                <p className="text-2xl font-bold text-gray-900">{pledges.length}</p>
+                <p className="text-xs text-gray-500">people pledged</p>
+              </div>
+            </div>
+          </div>
+          
           <div className="bg-white p-6 rounded-xl shadow-sm border">
             <div className="flex items-center">
               <div className="bg-orange-100 p-3 rounded-full">
-                <Clock className="h-6 w-6 text-orange-600" />
+                <Send className="h-6 w-6 text-orange-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm text-gray-600">Pending Confirmation</p>
-                <p className="text-2xl font-bold text-gray-900">{formatCurrency(totalPending)}</p>
-                <p className="text-xs text-gray-500">{pendingCount} pledges</p>
+                <p className="text-sm text-gray-600">Donations Sent</p>
+                <p className="text-2xl font-bold text-gray-900">{formatCurrency(totalSent)}</p>
+                <p className="text-xs text-gray-500">{sentPledges.length} sent</p>
               </div>
             </div>
           </div>
@@ -125,8 +157,8 @@ export default function BeneficiaryDashboard() {
               </div>
               <div className="ml-4">
                 <p className="text-sm text-gray-600">Confirmed Received</p>
-                <p className="text-2xl font-bold text-gray-900">{formatCurrency(totalConfirmed)}</p>
-                <p className="text-xs text-gray-500">{confirmedCount} confirmed</p>
+                <p className="text-2xl font-bold text-gray-900">{formatCurrency(totalReceived)}</p>
+                <p className="text-xs text-gray-500">{receivedPledges.length} confirmed</p>
               </div>
             </div>
           </div>
@@ -145,11 +177,9 @@ export default function BeneficiaryDashboard() {
                 </div>
               </div>
               <div className="ml-4">
-                <p className="text-sm text-gray-600">Total Received</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {formatCurrency(totalPending + totalConfirmed)}
-                </p>
-                <p className="text-xs text-gray-500">{pendingPledges.length} total</p>
+                <p className="text-sm text-gray-600">Total Pledged</p>
+                <p className="text-2xl font-bold text-gray-900">{formatCurrency(totalPledged)}</p>
+                <p className="text-xs text-gray-500">all pledges</p>
               </div>
             </div>
           </div>
@@ -157,9 +187,9 @@ export default function BeneficiaryDashboard() {
 
         {/* Pledges List */}
         <div className="bg-white rounded-xl shadow-sm border p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Pledges Received</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-6">Pledges from Donors</h2>
           
-          {pendingPledges.length === 0 ? (
+          {pledges.length === 0 ? (
             <div className="text-center py-12">
               <div className="bg-gray-100 p-4 rounded-full inline-flex mb-4">
                 <div className="w-8 h-8">
@@ -179,52 +209,95 @@ export default function BeneficiaryDashboard() {
             </div>
           ) : (
             <div className="space-y-4">
-              {pendingPledges.map((pledge) => (
+              {pledges.map((pledge) => (
                 <div 
                   key={pledge.id} 
-                  className={`p-4 border rounded-lg transition-colors ${
-                    pledge.confirmed 
-                      ? 'border-green-200 bg-green-50' 
-                      : 'border-orange-200 bg-orange-50'
-                  }`}
+                  className="p-4 border border-gray-200 rounded-lg"
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <div className={`p-2 rounded-full ${
-                          pledge.confirmed ? 'bg-green-100' : 'bg-orange-100'
-                        }`}>
-                          {pledge.confirmed ? (
-                            <Check className="h-4 w-4 text-green-600" />
-                          ) : (
-                            <Clock className="h-4 w-4 text-orange-600" />
-                          )}
+                      <div className="flex items-center space-x-3 mb-3">
+                        <div className="bg-primary-100 p-2 rounded-full">
+                          <User className="h-4 w-4 text-primary-600" />
                         </div>
                         <div>
-                          <p className="font-semibold text-gray-900">
-                            {formatCurrency(pledge.amount)}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            from <span className="font-medium">{pledge.donorUsername}</span>
-                          </p>
+                          <p className="font-semibold text-gray-900">{pledge.username}</p>
+                          <p className="text-lg font-bold text-primary-600">{formatCurrency(pledge.amount)}</p>
                         </div>
                       </div>
-                      <p className="text-xs text-gray-500 ml-9">
-                        Pledged on {formatDate(pledge.pledgedAt)}
-                      </p>
+                      
+                      <div className="ml-9 space-y-2">
+                        <p className="text-sm text-gray-600">
+                          Pledged on {formatDate(pledge.pledgedAt)}
+                        </p>
+                        
+                        <div className="flex items-center space-x-3">
+                          <span className={`px-2 py-1 text-xs rounded-full ${
+                            pledge.donationSent 
+                              ? 'bg-blue-100 text-blue-800' 
+                              : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {pledge.donationSent ? 'Donation Sent' : 'Not Sent Yet'}
+                          </span>
+                          
+                          <span className={`px-2 py-1 text-xs rounded-full ${
+                            pledge.confirmed 
+                              ? 'bg-green-100 text-green-800' 
+                              : 'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {pledge.confirmed ? 'Confirmed Received' : 'Awaiting Confirmation'}
+                          </span>
+                        </div>
+
+                        {pledge.donationDetails && (
+                          <div className="mt-3">
+                            <button
+                              onClick={() => setShowDetails(showDetails === pledge.id ? null : pledge.id)}
+                              className="flex items-center text-sm text-blue-600 hover:text-blue-800"
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              {showDetails === pledge.id ? 'Hide' : 'View'} Donation Details
+                            </button>
+                            
+                            {showDetails === pledge.id && (
+                              <div className="mt-2 p-3 bg-blue-50 rounded-lg text-sm">
+                                <div className="grid grid-cols-2 gap-2">
+                                  <div>
+                                    <span className="font-medium text-blue-900">Method:</span>
+                                    <span className="ml-1 text-blue-800">{pledge.donationDetails.method}</span>
+                                  </div>
+                                  <div>
+                                    <span className="font-medium text-blue-900">Amount:</span>
+                                    <span className="ml-1 text-blue-800">{formatCurrency(pledge.donationDetails.amount)}</span>
+                                  </div>
+                                  <div>
+                                    <span className="font-medium text-blue-900">Reference:</span>
+                                    <span className="ml-1 text-blue-800">{pledge.donationDetails.reference}</span>
+                                  </div>
+                                  <div>
+                                    <span className="font-medium text-blue-900">Date:</span>
+                                    <span className="ml-1 text-blue-800">{pledge.donationDetails.date}</span>
+                                  </div>
+                                </div>
+                                {pledge.donationDetails.message && (
+                                  <div className="mt-2">
+                                    <span className="font-medium text-blue-900">Message:</span>
+                                    <p className="text-blue-800 mt-1">{pledge.donationDetails.message}</p>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
 
-                    <div className="ml-4">
-                      {pledge.confirmed ? (
-                        <div className="flex items-center text-green-600">
-                          <Check className="h-4 w-4 mr-1" />
-                          <span className="text-sm font-medium">Confirmed</span>
-                        </div>
-                      ) : (
+                    <div className="ml-4 flex flex-col items-end space-y-2">
+                      {pledge.donationSent && !pledge.confirmed && (
                         <button
-                          onClick={() => handleConfirmPledge(pledge.id)}
+                          onClick={() => handleConfirmReceived(pledge.id)}
                           disabled={confirming === pledge.id}
-                          className="bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:cursor-not-allowed inline-flex items-center"
+                          className="bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:cursor-not-allowed inline-flex items-center"
                         >
                           {confirming === pledge.id ? (
                             <>
@@ -234,10 +307,24 @@ export default function BeneficiaryDashboard() {
                           ) : (
                             <>
                               <Check className="h-4 w-4 mr-2" />
-                              Confirm Received
+                              Received
                             </>
                           )}
                         </button>
+                      )}
+                      
+                      {pledge.confirmed && (
+                        <div className="flex items-center text-green-600">
+                          <Check className="h-4 w-4 mr-1" />
+                          <span className="text-sm font-medium">Confirmed</span>
+                        </div>
+                      )}
+                      
+                      {!pledge.donationSent && (
+                        <div className="text-center">
+                          <Clock className="h-5 w-5 text-gray-400 mx-auto mb-1" />
+                          <p className="text-xs text-gray-500">Waiting for<br/>donation</p>
+                        </div>
                       )}
                     </div>
                   </div>
