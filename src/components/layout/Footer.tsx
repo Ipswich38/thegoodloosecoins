@@ -44,9 +44,9 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <Link href="/signup" className="text-gray-300 hover:text-white transition-colors">
+                <a href="/#hero" className="text-gray-300 hover:text-white transition-colors">
                   Get Started
-                </Link>
+                </a>
               </li>
             </ul>
           </div>

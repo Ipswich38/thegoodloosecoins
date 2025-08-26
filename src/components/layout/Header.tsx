@@ -44,12 +44,7 @@ export default function Header() {
     { href: '/#contact', label: 'Contact' },
   ];
 
-  const isAuthPage = pathname.startsWith('/login') || pathname.startsWith('/signup');
   const isDashboard = pathname.startsWith('/dashboard');
-
-  if (isAuthPage) {
-    return null; // Don't show header on auth pages
-  }
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-40">
@@ -107,18 +102,18 @@ export default function Header() {
               </div>
             ) : (
               <div className="flex items-center gap-4">
-                <Link
-                  href="/signup"
+                <a
+                  href="/#hero"
                   className="text-primary-600 hover:text-primary-700 font-medium transition-colors"
                 >
                   Sign Up
-                </Link>
-                <Link
-                  href="/login"
+                </a>
+                <a
+                  href="/#hero"
                   className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                 >
                   Sign In
-                </Link>
+                </a>
               </div>
             )}
           </div>
@@ -178,20 +173,20 @@ export default function Header() {
                 </div>
               ) : (
                 <div className="space-y-2 pt-4 border-t border-gray-200">
-                  <Link
-                    href="/signup"
+                  <a
+                    href="/#hero"
                     className="block text-primary-600 hover:text-primary-700 px-4 py-2 font-medium transition-colors text-center"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Sign Up
-                  </Link>
-                  <Link
-                    href="/login"
+                  </a>
+                  <a
+                    href="/#hero"
                     className="block bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium transition-colors text-center"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Sign In
-                  </Link>
+                  </a>
                 </div>
               )}
             </div>
