@@ -294,11 +294,54 @@ export function seedTestData(): void {
   
   clearAllData();
   
-  // Add test users
+  // Add test users with additional profile info
   saveUser('TestUser1', '123456');
-  saveUser('TestUser2', '654321');
+  updateUser('TestUser1', { 
+    email: 'testuser1@example.com', 
+    phone: '+63 912 345 6789', 
+    location: 'Manila, Philippines' 
+  });
   
-  // Add test pledges
+  saveUser('TestUser2', '654321');
+  updateUser('TestUser2', { 
+    email: 'testuser2@example.com', 
+    phone: '+63 998 765 4321', 
+    location: 'Quezon City, Philippines' 
+  });
+  
+  saveUser('TestUser3', '111111');
+  updateUser('TestUser3', { 
+    email: 'testuser3@example.com', 
+    location: 'Cebu City, Philippines' 
+  });
+  
+  // Add test pledges with various amounts
   savePledge('TestUser1', '1', 'Test Beneficiary 1', 250.50);
   savePledge('TestUser2', '2', 'Test Beneficiary 2', 180.75);
+  savePledge('TestUser3', '1', 'Test Beneficiary 1', 75.25);
+  savePledge('TestUser1', '2', 'Test Beneficiary 2', 150.00);
+  
+  // Add some donation details for testing beneficiary confirmation
+  const pledges = getPledges();
+  const pledgeIds = Object.keys(pledges);
+  
+  if (pledgeIds.length >= 2) {
+    // Mark first pledge as sent with donation details
+    addDonationDetails(pledgeIds[0], {
+      method: 'e-wallet',
+      amount: 250.50,
+      reference: 'GC123456789',
+      date: new Date().toISOString().split('T')[0],
+      message: 'Sent via GCash to beneficiary account'
+    });
+    
+    // Mark second pledge as sent with bank transfer
+    addDonationDetails(pledgeIds[1], {
+      method: 'bank-transfer',
+      amount: 180.75,
+      reference: 'BT987654321',
+      date: new Date().toISOString().split('T')[0],
+      message: 'Bank transfer to school account'
+    });
+  }
 }

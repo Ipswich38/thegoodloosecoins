@@ -105,6 +105,15 @@ export default function Dashboard() {
               <div className="text-sm text-gray-600">
                 Public Dashboard
               </div>
+              {/* Hidden admin access - remove in production */}
+              {process.env.NODE_ENV === 'development' && (
+                <Link 
+                  href="/admin" 
+                  className="text-xs text-gray-400 hover:text-gray-600 opacity-30"
+                >
+                  Admin
+                </Link>
+              )}
             </div>
           </div>
         </div>
