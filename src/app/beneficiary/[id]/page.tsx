@@ -25,11 +25,11 @@ export default function BeneficiaryDashboard() {
 
   // Real data - will connect to API
   useEffect(() => {
-    // Real beneficiary data based on actual CSJDM beneficiaries
+    // Demo beneficiary data for presentation
     const realBeneficiary = beneficiaryId === '1' 
-      ? 'Grade 11 Section Mercado'
+      ? 'Test Beneficiary 1'
       : beneficiaryId === '2' 
-      ? 'CSJDM National Science High School'
+      ? 'Test Beneficiary 2'
       : 'Unknown Beneficiary';
     
     setBeneficiaryName(realBeneficiary);

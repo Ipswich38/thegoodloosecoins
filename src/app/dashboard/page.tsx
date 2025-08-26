@@ -8,23 +8,23 @@ import Leaderboard from '@/components/Leaderboard';
 import { generateLeaderboard, getGlobalStats } from '@/lib/localStore';
 
 export default function Dashboard() {
-  // Real verified beneficiaries
+  // Demo beneficiaries for presentation
   const beneficiaries = [
     {
       id: '1',
-      name: 'Grade 11 Section Mercado',
-      description: '3D printer, research testing, and emergency fund for students with limited family resources',
+      name: 'Test Beneficiary 1',
+      description: 'Educational programs and student support initiatives for community development',
       verified: true,
-      facebook: 'https://www.facebook.com/csjdmnshs',
-      school: 'CSJDM National Science High School'
+      facebook: 'https://www.facebook.com/testbeneficiary1',
+      school: 'Demo School 1'
     },
     {
       id: '2', 
-      name: 'CSJDM National Science High School',
-      description: 'STEM projects: Robotics laboratory, Mobile school clinic, e-library development',
+      name: 'Test Beneficiary 2',
+      description: 'Technology infrastructure and learning resources for enhanced educational experience',
       verified: true,
-      facebook: 'https://www.facebook.com/csjdmnshs',
-      location: 'San Jose del Monte, Bulacan, Philippines'
+      facebook: 'https://www.facebook.com/testbeneficiary2',
+      location: 'Demo Location, Philippines'
     }
   ];
 

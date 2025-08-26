@@ -227,6 +227,6 @@ export function seedTestData(): void {
   saveUser('TestUser2', '654321');
   
   // Add test pledges
-  savePledge('TestUser1', '1', 'Grade 11 Section Mercado', 250.50);
-  savePledge('TestUser2', '2', 'CSJDM National Science High School', 180.75);
+  savePledge('TestUser1', '1', 'Test Beneficiary 1', 250.50);
+  savePledge('TestUser2', '2', 'Test Beneficiary 2', 180.75);
 }
