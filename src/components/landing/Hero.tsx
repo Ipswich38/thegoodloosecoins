@@ -36,6 +36,7 @@ function HeroContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(false);
+  const [signupSuccess, setSignupSuccess] = useState(false);
   
   const router = useRouter();
 
@@ -153,7 +154,11 @@ function HeroContent() {
       const data = await response.json();
 
       if (data.success) {
-        router.push('/dashboard');
+        setSignupSuccess(true);
+        // Wait a moment before redirecting to show the success animation
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 3000); // 3 second delay for the animation
       } else {
         setAuthErrors({ 
           general: data.error || 'Signup failed. Please try again.' 
@@ -315,7 +320,37 @@ function HeroContent() {
                 </div>
               )}
 
-              {authMode === 'signup' ? (
+              {signupSuccess && (
+                <div className="text-center py-8">
+                  <div className="mb-6">
+                    <div className="relative inline-flex">
+                      <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4 mx-auto">
+                        <div className="w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                      <div className="absolute inset-0 w-16 h-16 bg-green-500 rounded-full flex items-center justify-center opacity-0 animate-ping">
+                        <div className="w-8 h-8 bg-white rounded-full"></div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <h3 className="text-xl font-bold text-green-600 mb-2">Welcome aboard! 🎉</h3>
+                  <p className="text-gray-600 mb-4">
+                    Crafting your personal dashboard...
+                  </p>
+                  
+                  <div className="flex items-center justify-center space-x-1 mb-4">
+                    <div className="w-2 h-2 bg-primary-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                    <div className="w-2 h-2 bg-primary-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                    <div className="w-2 h-2 bg-primary-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                  </div>
+                  
+                  <p className="text-sm text-gray-500">
+                    Setting up your impact journey...
+                  </p>
+                </div>
+              )}
+
+              {!signupSuccess && authMode === 'signup' ? (
                 <form onSubmit={handleSignupSubmit} className="space-y-4">
                   {/* User Type Selection */}
                   <div>
@@ -532,7 +567,7 @@ function HeroContent() {
                     )}
                   </button>
                 </form>
-              ) : (
+              ) : !signupSuccess ? (
                 <form onSubmit={handleLoginSubmit} className="space-y-4">
                   {/* Email */}
                   <div>
@@ -635,9 +670,10 @@ function HeroContent() {
                     </a>
                   </div>
                 </form>
-              )}
+              ) : null}
 
               {/* Mode Switch */}
+              {!signupSuccess && (
               <div className="mt-6 text-center">
                 <button
                   onClick={() => {
@@ -650,9 +686,10 @@ function HeroContent() {
                   {authMode === 'signup' ? 'Already have an account? Sign in' : 'New here? Create account'}
                 </button>
               </div>
+              )}
 
               {/* Privacy Note */}
-              {authMode === 'signup' && (
+              {!signupSuccess && authMode === 'signup' && (
                 <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                   <p className="text-blue-800 text-xs text-center">
                     🔒 We only collect essential information. You must be 13+ to participate independently, or have a guardian create an account.
