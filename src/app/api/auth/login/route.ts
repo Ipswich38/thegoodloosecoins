@@ -5,30 +5,33 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json();
+    const { username, password } = await request.json();
 
-    console.log('🔐 Login attempt with Supabase Auth:', { email });
+    console.log('🔐 Login attempt with simplified auth:', { username });
 
     // Validate input
-    if (!email || !password) {
+    if (!username || !password) {
       return NextResponse.json(
-        { success: false, error: 'Email and password are required' },
+        { success: false, error: 'Username and password are required' },
         { status: 400 }
       );
     }
 
     const supabase = createClient();
 
-    // Sign in with Supabase Auth
+    // Convert username to temporary email format for Supabase Auth
+    const tempEmail = `${username}@temp.thegoodloosecoins.app`;
+
+    // Sign in with Supabase Auth using temp email
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-      email,
+      email: tempEmail,
       password,
     });
 
     if (authError) {
       console.error('❌ Supabase auth error:', authError);
       return NextResponse.json(
-        { success: false, error: 'Invalid email or password' },
+        { success: false, error: 'Invalid username or password' },
         { status: 401 }
       );
     }
@@ -78,7 +81,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    console.log('✅ Login successful for:', authData.user.email);
+    console.log('✅ Login successful for username:', username);
 
     const response = NextResponse.json({
       success: true,

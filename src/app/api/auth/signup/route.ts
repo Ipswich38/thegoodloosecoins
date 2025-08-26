@@ -5,14 +5,14 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password, username, userType } = await request.json();
+    const { username, password, userType } = await request.json();
 
-    console.log('🔐 Creating new user with Supabase Auth:', { email, username, userType });
+    console.log('🔐 Creating new user with simple auth:', { username, userType });
 
     // Validate input
-    if (!email || !password || !username || !userType) {
+    if (!username || !password || !userType) {
       return NextResponse.json(
-        { success: false, error: 'All fields are required' },
+        { success: false, error: 'Username, password, and user type are required' },
         { status: 400 }
       );
     }
@@ -24,11 +24,43 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Basic validation
+    if (username.length < 3) {
+      return NextResponse.json(
+        { success: false, error: 'Username must be at least 3 characters' },
+        { status: 400 }
+      );
+    }
+
+    if (password.length < 6) {
+      return NextResponse.json(
+        { success: false, error: 'Password must be at least 6 characters' },
+        { status: 400 }
+      );
+    }
+
     const supabase = createClient();
 
-    // Sign up user with Supabase Auth
+    // Check if username already exists
+    const { data: existingUser } = await supabase
+      .from('users')
+      .select('username')
+      .eq('username', username)
+      .single();
+
+    if (existingUser) {
+      return NextResponse.json(
+        { success: false, error: 'Username already taken' },
+        { status: 400 }
+      );
+    }
+
+    // Create a temporary email for Supabase Auth (we can ask for real email later)
+    const tempEmail = `${username}@temp.thegoodloosecoins.app`;
+
+    // Sign up user with Supabase Auth using temp email
     const { data: authData, error: authError } = await supabase.auth.signUp({
-      email,
+      email: tempEmail,
       password,
       options: {
         data: {
@@ -41,7 +73,7 @@ export async function POST(request: NextRequest) {
     if (authError) {
       console.error('❌ Supabase auth error:', authError);
       return NextResponse.json(
-        { success: false, error: authError.message },
+        { success: false, error: 'Failed to create account' },
         { status: 400 }
       );
     }
@@ -61,13 +93,12 @@ export async function POST(request: NextRequest) {
       .insert({
         id: authData.user.id,
         username,
-        email,
+        email: null, // No email required initially
         type: userType,
       });
 
     if (profileError) {
       console.error('❌ Profile creation error:', profileError);
-      // Don't fail the signup if profile creation fails - user is still created in auth
     }
 
     // Initialize social impact points
@@ -80,21 +111,40 @@ export async function POST(request: NextRequest) {
 
     if (pointsError) {
       console.error('⚠️ Points initialization error:', pointsError);
-      // Don't fail signup for this
     }
 
-    return NextResponse.json({
+    // Auto-login the user by setting session cookies
+    const response = NextResponse.json({
       success: true,
-      message: authData.user.email_confirmed_at 
-        ? 'Account created successfully!' 
-        : 'Account created! Please check your email to confirm your account.',
+      message: 'Account created successfully! Welcome to The Good Loose Coins!',
       user: {
         id: authData.user.id,
-        email: authData.user.email,
         username,
+        email: null,
         type: userType,
       },
     });
+
+    if (authData.session) {
+      // Set auth cookies for immediate login
+      response.cookies.set('supabase-auth-token', authData.session.access_token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        expires: new Date(authData.session.expires_at! * 1000),
+        path: '/',
+      });
+
+      response.cookies.set('supabase-refresh-token', authData.session.refresh_token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+        path: '/',
+      });
+    }
+
+    return response;
 
   } catch (error) {
     console.error('🚨 Signup error:', error);
