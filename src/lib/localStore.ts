@@ -79,6 +79,11 @@ export function setCurrentUser(username: string): void {
   localStorage.setItem(CURRENT_USER_KEY, username);
 }
 
+export function clearCurrentUser(): void {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem(CURRENT_USER_KEY);
+}
+
 export function verifyUser(username: string, passcode: string): boolean {
   const users = getUsers();
   const user = users[username];

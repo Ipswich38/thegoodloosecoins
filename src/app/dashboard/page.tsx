@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Users, Award, TrendingUp } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import PledgeFlow from '@/components/PledgeFlow';
 import Leaderboard from '@/components/Leaderboard';
 import { generateLeaderboard, getGlobalStats } from '@/lib/localStore';
@@ -94,8 +95,16 @@ export default function Dashboard() {
               </div>
               <h1 className="text-xl font-bold text-gray-900">The Good Loose Coins</h1>
             </div>
-            <div className="text-sm text-gray-600">
-              Public Dashboard
+            <div className="flex items-center space-x-4">
+              <Link 
+                href="/signin" 
+                className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+              >
+                Sign In
+              </Link>
+              <div className="text-sm text-gray-600">
+                Public Dashboard
+              </div>
             </div>
           </div>
         </div>

@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
-import { ArrowLeft, User, Coins, Send, Check, Plus, Edit, Mail, Phone, MapPin } from 'lucide-react';
+import { useParams, useRouter } from 'next/navigation';
+import { ArrowLeft, User, Coins, Send, Check, Plus, Edit, Mail, Phone, MapPin, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { formatCurrency } from '@/lib/coins';
-import { getUserPledges, getUser, updateUser, addDonationDetails } from '@/lib/localStore';
+import { getUserPledges, getUser, updateUser, addDonationDetails, getCurrentUser, clearCurrentUser } from '@/lib/localStore';
 
 interface Pledge {
   id: string;
@@ -38,6 +38,7 @@ interface User {
 
 export default function DonorAccount() {
   const params = useParams();
+  const router = useRouter();
   const username = params.username as string;
   
   const [user, setUser] = useState<User | null>(null);
@@ -58,6 +59,13 @@ export default function DonorAccount() {
   });
 
   useEffect(() => {
+    // Check if user is authenticated and accessing their own account
+    const currentUser = getCurrentUser();
+    if (!currentUser || currentUser !== username) {
+      router.push('/signin');
+      return;
+    }
+
     const userData = getUser(username);
     const userPledges = getUserPledges(username);
     
@@ -85,7 +93,7 @@ export default function DonorAccount() {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('tglc-data-changed', handleStorageChange);
     };
-  }, [username]);
+  }, [username, router]);
 
   const handleUpdateProfile = () => {
     if (user) {
@@ -127,6 +135,11 @@ export default function DonorAccount() {
 
     // Dispatch event for real-time updates
     window.dispatchEvent(new CustomEvent('tglc-data-changed'));
+  };
+
+  const handleSignOut = () => {
+    clearCurrentUser();
+    router.push('/dashboard');
   };
 
   if (!user) {
@@ -175,8 +188,17 @@ export default function DonorAccount() {
                 <p className="text-sm text-gray-600">Donor Account</p>
               </div>
             </div>
-            <div className="text-sm text-gray-600">
-              Member since {new Date(user.createdAt).toLocaleDateString()}
+            <div className="flex items-center space-x-4">
+              <div className="text-sm text-gray-600">
+                Member since {new Date(user.createdAt).toLocaleDateString()}
+              </div>
+              <button
+                onClick={handleSignOut}
+                className="flex items-center text-sm text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded transition-colors"
+              >
+                <LogOut className="h-4 w-4 mr-1" />
+                Sign Out
+              </button>
             </div>
           </div>
         </div>
