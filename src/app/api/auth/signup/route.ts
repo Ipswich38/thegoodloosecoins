@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Auto-login the user by setting session cookies
-    const response = NextResponse.json({
+    return NextResponse.json({
       success: true,
       message: 'Account created successfully! Welcome to The Good Loose Coins!',
       user: {
@@ -178,66 +178,8 @@ export async function POST(request: NextRequest) {
         type: userType,
         birth_year: birthYear,
       },
+      session: authData.session,
     });
-
-    if (authData.session) {
-      console.log('🍪 Setting session cookies:', {
-        hasAccessToken: !!authData.session.access_token,
-        hasRefreshToken: !!authData.session.refresh_token,
-        expiresAt: authData.session.expires_at,
-        expiresAtDate: new Date(authData.session.expires_at! * 1000)
-      });
-
-      // Set auth cookies for immediate login
-      response.cookies.set('supabase-auth-token', authData.session.access_token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        expires: new Date(authData.session.expires_at! * 1000),
-        path: '/',
-      });
-
-      response.cookies.set('supabase-refresh-token', authData.session.refresh_token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-        path: '/',
-      });
-
-      console.log('✅ Session cookies set successfully');
-    } else {
-      console.log('⚠️ No session returned from signup - attempting manual sign in...');
-      
-      // Try to sign in immediately after signup
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (signInError) {
-        console.error('❌ Auto sign-in failed:', signInError);
-      } else if (signInData.session) {
-        console.log('✅ Auto sign-in successful, setting session cookies');
-        response.cookies.set('supabase-auth-token', signInData.session.access_token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          expires: new Date(signInData.session.expires_at! * 1000),
-          path: '/',
-        });
-
-        response.cookies.set('supabase-refresh-token', signInData.session.refresh_token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-          path: '/',
-        });
-      }
-    }
-
-    return response;
 
   } catch (error) {
     console.error('🚨 Signup error:', error);

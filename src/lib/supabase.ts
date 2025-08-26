@@ -1,4 +1,5 @@
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import { cookies } from 'next/headers';
 
 // Ensure environment variables are clean
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || 'https://wodsdkyipyiuqmhnsxkw.supabase.co';
@@ -11,11 +12,30 @@ if (!supabaseAnonKey || supabaseAnonKey === 'undefined' || supabaseAnonKey.lengt
   console.log('✅ Supabase anon key loaded successfully');
 }
 
-export const supabase = createSupabaseClient(supabaseUrl, supabaseAnonKey);
+// Client-side Supabase client
+export const supabase = createSupabaseClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+  },
+});
 
-// Server-side client for API routes
+// Server-side client for API routes with automatic cookie handling
 export function createClient() {
-  return createSupabaseClient(supabaseUrl, supabaseAnonKey);
+  const cookieStore = cookies();
+  
+  return createSupabaseClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+    global: {
+      headers: {
+        'cache-control': 'no-cache',
+      },
+    },
+  });
 }
 
 export type Database = {

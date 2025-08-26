@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Login successful for user:', userProfile?.username || authData.user.email);
 
-    const response = NextResponse.json({
+    return NextResponse.json({
       success: true,
       message: 'Login successful!',
       user: {
@@ -106,26 +106,8 @@ export async function POST(request: NextRequest) {
         email: authData.user.email,
         type: userProfile?.type || authData.user.user_metadata?.user_type || 'DONOR',
       },
+      session: authData.session,
     });
-
-    // Set auth cookies for session management
-    response.cookies.set('supabase-auth-token', authData.session.access_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      expires: new Date(authData.session.expires_at! * 1000),
-      path: '/',
-    });
-
-    response.cookies.set('supabase-refresh-token', authData.session.refresh_token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-      path: '/',
-    });
-
-    return response;
 
   } catch (error) {
     console.error('🚨 Login error:', error);

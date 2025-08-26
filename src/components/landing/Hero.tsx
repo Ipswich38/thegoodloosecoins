@@ -2,6 +2,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowRight, Coins, Shield, TrendingUp, Users, Eye, EyeOff, Loader2, AlertCircle, Calendar, User, Mail, Lock } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 interface AuthFormData {
   email: string;
@@ -156,6 +157,14 @@ function HeroContent() {
       if (data.success) {
         setSignupSuccess(true);
         console.log('🎉 Signup successful, starting redirect timer...');
+        
+        // Set the session in Supabase client if it exists
+        if (data.session) {
+          console.log('🔗 Setting Supabase session...');
+          await supabase.auth.setSession(data.session);
+          console.log('✅ Session set successfully');
+        }
+        
         // Wait a moment before redirecting to show the success animation
         setTimeout(() => {
           console.log('⏰ Redirecting to dashboard...');
@@ -201,6 +210,12 @@ function HeroContent() {
       const data = await response.json();
 
       if (data.success) {
+        // Set the session in Supabase client if it exists
+        if (data.session) {
+          console.log('🔗 Setting login session...');
+          await supabase.auth.setSession(data.session);
+          console.log('✅ Login session set successfully');
+        }
         router.push('/dashboard');
       } else {
         setAuthErrors({ 

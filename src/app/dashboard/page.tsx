@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -13,60 +14,45 @@ export default function DashboardPage() {
     const redirectToUserDashboard = async () => {
       console.log('🏠 MAIN DASHBOARD - Checking authentication and redirecting...');
       
-      // Wait a moment to allow cookies to be set properly
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
       try {
-        // Try direct session check first, then fallback to Supabase auth
-        console.log('📡 Trying /api/auth/check-session...');
-        let response = await fetch('/api/auth/check-session', {
-          method: 'GET',
-          credentials: 'include',
-        });
+        // Check if user has a session with Supabase
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
-        console.log('📋 Check-session response:', {
-          status: response.status,
-          ok: response.ok
+        console.log('📋 Session check:', {
+          hasSession: !!session,
+          hasUser: !!session?.user,
+          sessionError: sessionError?.message
         });
-        
-        if (!response.ok) {
-          console.log('📡 Check-session failed, trying /api/auth/me...');
-          response = await fetch('/api/auth/me', {
-            method: 'GET',
-            credentials: 'include',
-          });
-          
-          console.log('📋 Auth/me response:', {
-            status: response.status,
-            ok: response.ok
-          });
-        }
 
-        if (!response.ok) {
-          console.log('❌ Both auth endpoints failed - redirecting to home');
-          console.log('🔄 Redirecting with message: Please log in to access your dashboard.');
-          // User is not authenticated, redirect to home page
+        if (sessionError || !session || !session.user) {
+          console.log('❌ No valid session - redirecting to home');
           router.push('/?message=' + encodeURIComponent('Please log in to access your dashboard.'));
           return;
         }
 
-        const data = await response.json();
+        // Get user profile from our database
+        const { data: userProfile, error: profileError } = await supabase
+          .from('users')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+
+        if (profileError || !userProfile) {
+          console.error('❌ Profile fetch error:', profileError);
+          router.push('/?message=' + encodeURIComponent('Please log in to access your dashboard.'));
+          return;
+        }
+
         console.log('✅ Auth successful:', {
-          success: data.success,
-          hasUser: !!data.user,
-          userType: data.user?.type
+          userId: session.user.id,
+          userType: userProfile.type
         });
 
-        if (data.success && data.user) {
-          // Redirect to appropriate dashboard based on user type
-          const userType = data.user.type.toLowerCase();
-          console.log(`🎯 Redirecting to dashboard/${userType}`);
-          router.push(`/dashboard/${userType}`);
-        } else {
-          console.log('❌ No user data in successful response - redirecting to home');
-          // User data not available, redirect to home page  
-          router.push('/?message=' + encodeURIComponent('Please log in to access your dashboard.'));
-        }
+        // Redirect to appropriate dashboard based on user type
+        const userType = userProfile.type.toLowerCase();
+        console.log(`🎯 Redirecting to dashboard/${userType}`);
+        router.push(`/dashboard/${userType}`);
+
       } catch (error) {
         console.error('🚨 Error fetching user data:', error);
         setError('Unable to load dashboard. Please try again.');
