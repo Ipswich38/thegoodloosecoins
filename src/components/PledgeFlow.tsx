@@ -5,6 +5,7 @@ import { Calculator, User, Send, Check } from 'lucide-react';
 import Image from 'next/image';
 import { calculateCoinTotal, formatCurrency, COIN_VALUES, getCoinDisplayName } from '@/lib/coins';
 import { CoinCount } from '@/types/pledge';
+import UsernameCreation from './UsernameCreation';
 
 interface PledgeFlowProps {
   beneficiaries: Array<{
@@ -15,7 +16,7 @@ interface PledgeFlowProps {
   }>;
 }
 
-type PledgeStep = 'select-beneficiary' | 'count-coins' | 'enter-username' | 'confirm' | 'success';
+type PledgeStep = 'select-beneficiary' | 'count-coins' | 'enter-username' | 'create-profile' | 'confirm' | 'success';
 
 export default function PledgeFlow({ beneficiaries }: PledgeFlowProps) {
   const [currentStep, setCurrentStep] = useState<PledgeStep>('select-beneficiary');
@@ -24,6 +25,8 @@ export default function PledgeFlow({ beneficiaries }: PledgeFlowProps) {
   const [customAmount, setCustomAmount] = useState<string>('');
   const [useCustomAmount, setUseCustomAmount] = useState(false);
   const [username, setUsername] = useState('');
+  const [passcode, setPasscode] = useState('');
+  const [showUsernameCreation, setShowUsernameCreation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const selectedBeneficiaryData = beneficiaries.find(b => b.id === selectedBeneficiary);
@@ -45,6 +48,13 @@ export default function PledgeFlow({ beneficiaries }: PledgeFlowProps) {
     setIsSubmitting(false);
   };
 
+  const handleUsernameCreated = (newUsername: string, newPasscode: string) => {
+    setUsername(newUsername);
+    setPasscode(newPasscode);
+    setShowUsernameCreation(false);
+    setCurrentStep('confirm');
+  };
+
   const resetFlow = () => {
     setCurrentStep('select-beneficiary');
     setSelectedBeneficiary(null);
@@ -52,6 +62,8 @@ export default function PledgeFlow({ beneficiaries }: PledgeFlowProps) {
     setCustomAmount('');
     setUseCustomAmount(false);
     setUsername('');
+    setPasscode('');
+    setShowUsernameCreation(false);
   };
 
   if (beneficiaries.length === 0) {
@@ -261,17 +273,36 @@ export default function PledgeFlow({ beneficiaries }: PledgeFlowProps) {
               Back
             </button>
             <button
-              onClick={() => setCurrentStep('confirm')}
-              disabled={!username.trim() || username.trim().length < 2}
-              className="flex-1 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-300 text-white py-3 rounded-lg font-medium transition-colors disabled:cursor-not-allowed"
+              onClick={() => {
+                if (username.trim() && username.trim().length >= 2) {
+                  setCurrentStep('confirm');
+                } else {
+                  setShowUsernameCreation(true);
+                  setCurrentStep('create-profile');
+                }
+              }}
+              className="flex-1 bg-primary-600 hover:bg-primary-700 text-white py-3 rounded-lg font-medium transition-colors"
             >
-              Continue
+              {username.trim() && username.trim().length >= 2 ? 'Continue' : 'Create Profile'}
             </button>
           </div>
         </div>
       )}
 
-      {/* Step 4: Confirm */}
+      {/* Step 4: Create Profile */}
+      {currentStep === 'create-profile' && showUsernameCreation && (
+        <div>
+          <UsernameCreation
+            onSuccess={handleUsernameCreated}
+            onCancel={() => {
+              setShowUsernameCreation(false);
+              setCurrentStep('enter-username');
+            }}
+          />
+        </div>
+      )}
+
+      {/* Step 5: Confirm */}
       {currentStep === 'confirm' && (
         <div className="max-w-md mx-auto">
           <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">Confirm Your Pledge</h3>

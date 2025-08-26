@@ -7,19 +7,23 @@ import PledgeFlow from '@/components/PledgeFlow';
 import Leaderboard from '@/components/Leaderboard';
 
 export default function Dashboard() {
-  // Mock data - will be replaced with real data later
+  // Real verified beneficiaries
   const beneficiaries = [
     {
       id: '1',
-      name: 'Maria Santos Family',
-      description: 'Single mother of 3 children, needs support for daily meals',
-      verified: true
+      name: 'Grade 11 Section Mercado',
+      description: '3D printer, research testing, and emergency fund for students with limited family resources',
+      verified: true,
+      facebook: 'https://www.facebook.com/csjdmnshs',
+      school: 'CSJDM National Science High School'
     },
     {
       id: '2', 
-      name: 'Juan Dela Cruz',
-      description: 'Senior citizen needing medication assistance',
-      verified: true
+      name: 'CSJDM National Science High School',
+      description: 'STEM projects: Robotics laboratory, Mobile school clinic, e-library development',
+      verified: true,
+      facebook: 'https://www.facebook.com/csjdmnshs',
+      location: 'San Jose del Monte, Bulacan, Philippines'
     }
   ];
 
@@ -176,17 +180,38 @@ export default function Dashboard() {
             {beneficiaries.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {beneficiaries.map((beneficiary) => (
-                  <div key={beneficiary.id} className="p-4 border border-gray-200 rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="font-semibold text-gray-900">{beneficiary.name}</h3>
-                        <p className="text-sm text-gray-600 mt-1">{beneficiary.description}</p>
+                  <div key={beneficiary.id} className="p-6 border border-gray-200 rounded-lg hover:border-primary-300 transition-colors">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-900 mb-1">{beneficiary.name}</h3>
+                        {beneficiary.school && (
+                          <p className="text-xs text-gray-500 mb-2">{beneficiary.school}</p>
+                        )}
+                        {beneficiary.location && (
+                          <p className="text-xs text-gray-500 mb-2">{beneficiary.location}</p>
+                        )}
                       </div>
                       {beneficiary.verified && (
                         <div className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                          ✓ Verified
+                          ✓ PTA Verified
                         </div>
                       )}
+                    </div>
+                    
+                    <p className="text-sm text-gray-600 mb-4 leading-relaxed">{beneficiary.description}</p>
+                    
+                    <div className="flex items-center justify-between">
+                      <a 
+                        href={beneficiary.facebook} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 text-xs font-medium transition-colors"
+                      >
+                        📘 Facebook Page
+                      </a>
+                      <div className="text-xs text-gray-400">
+                        ID: #{beneficiary.id}
+                      </div>
                     </div>
                   </div>
                 ))}
