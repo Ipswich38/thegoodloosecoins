@@ -168,48 +168,46 @@ export default function Dashboard() {
           <PledgeFlow beneficiaries={beneficiaries} />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Verified Beneficiaries */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl shadow-sm border p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">Verified Beneficiaries</h2>
-              
-              {beneficiaries.length > 0 ? (
-                <div className="space-y-4">
-                  {beneficiaries.map((beneficiary) => (
-                    <div key={beneficiary.id} className="p-4 border border-gray-200 rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="font-semibold text-gray-900">{beneficiary.name}</h3>
-                          <p className="text-sm text-gray-600 mt-1">{beneficiary.description}</p>
-                        </div>
-                        {beneficiary.verified && (
-                          <div className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                            ✓ Verified
-                          </div>
-                        )}
+        {/* Verified Beneficiaries Section */}
+        <div className="mb-8">
+          <div className="bg-white rounded-xl shadow-sm border p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">Verified Beneficiaries</h2>
+            
+            {beneficiaries.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {beneficiaries.map((beneficiary) => (
+                  <div key={beneficiary.id} className="p-4 border border-gray-200 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-semibold text-gray-900">{beneficiary.name}</h3>
+                        <p className="text-sm text-gray-600 mt-1">{beneficiary.description}</p>
                       </div>
+                      {beneficiary.verified && (
+                        <div className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                          ✓ Verified
+                        </div>
+                      )}
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <div className="bg-gray-100 p-4 rounded-full inline-flex mb-4">
-                    <Users className="h-8 w-8 text-gray-400" />
                   </div>
-                  <p className="text-gray-500 text-lg">No verified beneficiaries yet</p>
-                  <p className="text-gray-400 text-sm mt-2">
-                    Beneficiaries will appear here once verified and approved
-                  </p>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <div className="bg-gray-100 p-4 rounded-full inline-flex mb-4">
+                  <Users className="h-8 w-8 text-gray-400" />
                 </div>
-              )}
-            </div>
+                <p className="text-gray-500 text-lg">No verified beneficiaries yet</p>
+                <p className="text-gray-400 text-sm mt-2">
+                  Beneficiaries will appear here once verified and approved
+                </p>
+              </div>
+            )}
           </div>
+        </div>
 
-          {/* Leaderboard */}
-          <div className="lg:col-span-1">
-            <Leaderboard entries={leaderboardEntries} />
-          </div>
+        {/* Leaderboard Section */}
+        <div className="mb-8">
+          <Leaderboard entries={leaderboardEntries} />
         </div>
 
         {/* How it Works */}
