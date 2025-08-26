@@ -67,13 +67,29 @@ export async function POST(request: NextRequest) {
           username,
           user_type: userType,
         },
+        emailRedirectTo: undefined, // Don't send confirmation emails for temp emails
       },
     });
 
     if (authError) {
       console.error('❌ Supabase auth error:', authError);
+      
+      // Provide more specific error messages
+      let errorMessage = 'Failed to create account';
+      if (authError.message?.includes('email')) {
+        errorMessage = 'Email configuration issue. Please try again.';
+      } else if (authError.message?.includes('password')) {
+        errorMessage = 'Password does not meet requirements';
+      } else if (authError.message?.includes('already registered')) {
+        errorMessage = 'This username is already taken';
+      }
+      
       return NextResponse.json(
-        { success: false, error: 'Failed to create account' },
+        { 
+          success: false, 
+          error: errorMessage,
+          details: process.env.NODE_ENV === 'development' ? authError.message : undefined
+        },
         { status: 400 }
       );
     }
@@ -99,6 +115,13 @@ export async function POST(request: NextRequest) {
 
     if (profileError) {
       console.error('❌ Profile creation error:', profileError);
+      // Don't fail the signup if profile creation fails - we can retry later
+      // But log the specific error for debugging
+      console.error('Profile error details:', {
+        message: profileError.message,
+        details: profileError.details,
+        hint: profileError.hint
+      });
     }
 
     // Initialize social impact points
