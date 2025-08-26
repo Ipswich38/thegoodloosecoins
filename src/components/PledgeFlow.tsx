@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { calculateCoinTotal, formatCurrency, COIN_VALUES, getCoinDisplayName } from '@/lib/coins';
 import { CoinCount } from '@/types/pledge';
 import UsernameCreation from './UsernameCreation';
+import { saveUser, savePledge, getCurrentUser, setCurrentUser } from '@/lib/localStore';
 
 interface PledgeFlowProps {
   beneficiaries: Array<{
@@ -14,11 +15,12 @@ interface PledgeFlowProps {
     description: string;
     verified: boolean;
   }>;
+  onPledgeSuccess?: () => void;
 }
 
 type PledgeStep = 'select-beneficiary' | 'count-coins' | 'enter-username' | 'create-profile' | 'confirm' | 'success';
 
-export default function PledgeFlow({ beneficiaries }: PledgeFlowProps) {
+export default function PledgeFlow({ beneficiaries, onPledgeSuccess }: PledgeFlowProps) {
   const [currentStep, setCurrentStep] = useState<PledgeStep>('select-beneficiary');
   const [selectedBeneficiary, setSelectedBeneficiary] = useState<string | null>(null);
   const [coinCounts, setCoinCounts] = useState<Partial<CoinCount>>({});
@@ -42,13 +44,44 @@ export default function PledgeFlow({ beneficiaries }: PledgeFlowProps) {
 
   const handleSubmitPledge = async () => {
     setIsSubmitting(true);
-    // TODO: Submit pledge to API
-    await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API call
-    setCurrentStep('success');
-    setIsSubmitting(false);
+    
+    try {
+      // Save pledge to local storage
+      const pledgeId = savePledge(
+        username,
+        selectedBeneficiary!,
+        selectedBeneficiaryData!.name,
+        totalAmount
+      );
+      
+      console.log('Pledge saved:', pledgeId);
+      
+      // Simulate processing time
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      setCurrentStep('success');
+      
+      // Trigger callback to refresh dashboard data
+      if (onPledgeSuccess) {
+        onPledgeSuccess();
+      }
+      
+      // Dispatch custom event for real-time updates
+      window.dispatchEvent(new CustomEvent('tglc-data-changed'));
+      
+    } catch (error) {
+      console.error('Error saving pledge:', error);
+      // Handle error - could show error message
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleUsernameCreated = (newUsername: string, newPasscode: string) => {
+    // Save user to local storage
+    saveUser(newUsername, newPasscode);
+    setCurrentUser(newUsername);
+    
     setUsername(newUsername);
     setPasscode(newPasscode);
     setShowUsernameCreation(false);
@@ -64,6 +97,11 @@ export default function PledgeFlow({ beneficiaries }: PledgeFlowProps) {
     setUsername('');
     setPasscode('');
     setShowUsernameCreation(false);
+    
+    // Trigger data refresh on reset
+    if (onPledgeSuccess) {
+      onPledgeSuccess();
+    }
   };
 
   if (beneficiaries.length === 0) {
@@ -274,7 +312,7 @@ export default function PledgeFlow({ beneficiaries }: PledgeFlowProps) {
             </button>
             <button
               onClick={() => {
-                if (username.trim() && username.trim().length >= 2) {
+                if (username.trim() && username.trim().length >= 2 && passcode) {
                   setCurrentStep('confirm');
                 } else {
                   setShowUsernameCreation(true);
@@ -283,7 +321,7 @@ export default function PledgeFlow({ beneficiaries }: PledgeFlowProps) {
               }}
               className="flex-1 bg-primary-600 hover:bg-primary-700 text-white py-3 rounded-lg font-medium transition-colors"
             >
-              {username.trim() && username.trim().length >= 2 ? 'Continue' : 'Create Profile'}
+              {username.trim() && username.trim().length >= 2 && passcode ? 'Continue' : 'Create Profile'}
             </button>
           </div>
         </div>

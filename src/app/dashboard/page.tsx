@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Users, Award, TrendingUp } from 'lucide-react';
 import Image from 'next/image';
 import PledgeFlow from '@/components/PledgeFlow';
 import Leaderboard from '@/components/Leaderboard';
+import { generateLeaderboard, getGlobalStats } from '@/lib/localStore';
 
 export default function Dashboard() {
   // Real verified beneficiaries
@@ -27,8 +28,8 @@ export default function Dashboard() {
     }
   ];
 
-  // Real leaderboard data - starts empty for production
-  const leaderboardEntries: Array<{
+  // Real leaderboard data from localStorage
+  const [leaderboardEntries, setLeaderboardEntries] = useState<Array<{
     id: string;
     username: string;
     totalPledged: number;
@@ -36,7 +37,44 @@ export default function Dashboard() {
     impactPoints: number;
     pledgeCount: number;
     rank: number;
-  }> = [];
+  }>>([]);
+
+  const [globalStats, setGlobalStats] = useState({
+    totalPledged: 0,
+    totalSent: 0,
+    totalImpactPoints: 0,
+    totalPledges: 0,
+    totalUsers: 0,
+    beneficiaryCount: 2
+  });
+
+  // Update data when component mounts and when localStorage changes
+  useEffect(() => {
+    const updateData = () => {
+      setLeaderboardEntries(generateLeaderboard());
+      setGlobalStats(getGlobalStats());
+    };
+
+    updateData();
+
+    // Listen for storage changes to update in real-time
+    const handleStorageChange = () => updateData();
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also listen for custom events when data changes in the same tab
+    window.addEventListener('tglc-data-changed', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('tglc-data-changed', handleStorageChange);
+    };
+  }, []);
+
+  // Function to trigger data refresh
+  const refreshData = () => {
+    setLeaderboardEntries(generateLeaderboard());
+    setGlobalStats(getGlobalStats());
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50">
@@ -93,7 +131,9 @@ export default function Dashboard() {
               </div>
               <div className="ml-4">
                 <p className="text-sm text-gray-600">Total Pledged</p>
-                <p className="text-2xl font-bold text-gray-900">₱0.00</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  ₱{globalStats.totalPledged.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </p>
               </div>
             </div>
           </div>
@@ -105,7 +145,9 @@ export default function Dashboard() {
               </div>
               <div className="ml-4">
                 <p className="text-sm text-gray-600">Successfully Sent</p>
-                <p className="text-2xl font-bold text-gray-900">₱0.00</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  ₱{globalStats.totalSent.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </p>
               </div>
             </div>
           </div>
@@ -117,7 +159,9 @@ export default function Dashboard() {
               </div>
               <div className="ml-4">
                 <p className="text-sm text-gray-600">Impact Points</p>
-                <p className="text-2xl font-bold text-gray-900">0</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {globalStats.totalImpactPoints.toLocaleString()}
+                </p>
               </div>
             </div>
           </div>
@@ -125,7 +169,10 @@ export default function Dashboard() {
 
         {/* Pledge Flow */}
         <div className="mb-8">
-          <PledgeFlow beneficiaries={beneficiaries} />
+          <PledgeFlow 
+            beneficiaries={beneficiaries} 
+            onPledgeSuccess={refreshData}
+          />
         </div>
 
         {/* Verified Beneficiaries Section */}
