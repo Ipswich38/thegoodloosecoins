@@ -1,6 +1,6 @@
 'use client';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowRight, Coins, Shield, TrendingUp, Users, Eye, EyeOff, Loader2, AlertCircle, Calendar, User, Mail, Lock } from 'lucide-react';
 
 interface AuthFormData {
@@ -17,7 +17,8 @@ interface LoginFormData {
   password: string;
 }
 
-export default function Hero() {
+function HeroContent() {
+  const searchParams = useSearchParams();
   const [authMode, setAuthMode] = useState<'signup' | 'login'>('signup');
   const [signupData, setSignupData] = useState<AuthFormData>({
     email: '',
@@ -37,6 +38,15 @@ export default function Hero() {
   const [isAuthLoading, setIsAuthLoading] = useState(false);
   
   const router = useRouter();
+
+  // Check for message parameter and set login mode if user was redirected
+  useEffect(() => {
+    const message = searchParams.get('message');
+    if (message) {
+      setAuthMode('login');
+      setAuthErrors({ general: message });
+    }
+  }, [searchParams]);
 
   const getCurrentYear = () => new Date().getFullYear();
   const getMinBirthYear = () => getCurrentYear() - 100; // Max age 100
@@ -654,5 +664,38 @@ export default function Hero() {
         </div>
       </div>
     </section>
+  );
+}
+
+export default function Hero() {
+  return (
+    <Suspense fallback={
+      <section id="hero" className="bg-gradient-to-br from-primary-50 via-white to-secondary-50 py-20 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid lg:grid-cols-3 gap-12 items-center">
+            <div className="lg:col-span-2 text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading...</p>
+            </div>
+            <div className="lg:col-span-1">
+              <div className="bg-white p-6 rounded-xl shadow-xl border border-gray-100 text-center">
+                <div className="animate-pulse">
+                  <div className="h-8 w-8 bg-gray-300 rounded mx-auto mb-4"></div>
+                  <div className="h-6 bg-gray-300 rounded mb-2"></div>
+                  <div className="h-4 bg-gray-300 rounded mb-4"></div>
+                  <div className="space-y-4">
+                    <div className="h-12 bg-gray-300 rounded"></div>
+                    <div className="h-12 bg-gray-300 rounded"></div>
+                    <div className="h-12 bg-gray-300 rounded"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    }>
+      <HeroContent />
+    </Suspense>
   );
 }

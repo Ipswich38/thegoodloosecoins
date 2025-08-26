@@ -40,10 +40,10 @@ export default function DashboardPage() {
         }
 
         if (!response.ok) {
-          console.log('❌ Both auth endpoints failed - redirecting to login');
+          console.log('❌ Both auth endpoints failed - redirecting to home');
           console.log('🔄 Redirecting with message: Please log in to access your dashboard.');
-          // User is not authenticated, redirect to login
-          router.push('/login?message=' + encodeURIComponent('Please log in to access your dashboard.'));
+          // User is not authenticated, redirect to home page
+          router.push('/?message=' + encodeURIComponent('Please log in to access your dashboard.'));
           return;
         }
 
@@ -60,9 +60,9 @@ export default function DashboardPage() {
           console.log(`🎯 Redirecting to dashboard/${userType}`);
           router.push(`/dashboard/${userType}`);
         } else {
-          console.log('❌ No user data in successful response - redirecting to login');
-          // User data not available, redirect to login
-          router.push('/login?message=' + encodeURIComponent('Please log in to access your dashboard.'));
+          console.log('❌ No user data in successful response - redirecting to home');
+          // User data not available, redirect to home page  
+          router.push('/?message=' + encodeURIComponent('Please log in to access your dashboard.'));
         }
       } catch (error) {
         console.error('🚨 Error fetching user data:', error);
@@ -82,10 +82,10 @@ export default function DashboardPage() {
             <h2 className="text-lg font-semibold text-red-800 mb-2">Access Error</h2>
             <p className="text-red-600 mb-4">{error}</p>
             <button
-              onClick={() => router.push('/login')}
+              onClick={() => router.push('/')}
               className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
             >
-              Go to Login
+              Go to Home
             </button>
           </div>
         </div>

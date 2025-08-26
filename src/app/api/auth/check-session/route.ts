@@ -4,13 +4,13 @@ import { createClient } from '@/lib/supabase';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
-  console.log('🔍 Checking authentication with Supabase Auth');
+  console.log('🔍 Checking session with cookies');
   
   try {
     const authToken = request.cookies.get('supabase-auth-token')?.value;
     const refreshToken = request.cookies.get('supabase-refresh-token')?.value;
 
-    console.log('🍪 Auth cookies:', {
+    console.log('🍪 Session cookies:', {
       hasAuthToken: !!authToken,
       hasRefreshToken: !!refreshToken,
     });
@@ -26,10 +26,18 @@ export async function GET(request: NextRequest) {
 
     // Set the session using the tokens
     if (authToken && refreshToken) {
-      await supabase.auth.setSession({
+      const { error: sessionError } = await supabase.auth.setSession({
         access_token: authToken,
         refresh_token: refreshToken,
       });
+
+      if (sessionError) {
+        console.error('❌ Session error:', sessionError);
+        return NextResponse.json(
+          { success: false, error: 'Invalid session' },
+          { status: 401 }
+        );
+      }
     }
 
     // Get current user
@@ -84,17 +92,17 @@ export async function GET(request: NextRequest) {
         .eq('id', user.id)
         .single();
 
-      if (!retryProfile) {
-        return NextResponse.json(
-          { success: false, error: 'Failed to create user profile' },
-          { status: 500 }
-        );
-      }
-
       finalUserProfile = retryProfile;
     }
+
+    if (!finalUserProfile) {
+      return NextResponse.json(
+        { success: false, error: 'Failed to load user profile' },
+        { status: 500 }
+      );
+    }
     
-    console.log('✅ Auth check successful:', user.email, finalUserProfile.type);
+    console.log('✅ Session check successful:', user.email, finalUserProfile.type);
 
     return NextResponse.json({
       success: true,
@@ -103,13 +111,14 @@ export async function GET(request: NextRequest) {
         username: finalUserProfile.username,
         email: user.email,
         type: finalUserProfile.type,
+        birth_year: finalUserProfile.birth_year,
         createdAt: finalUserProfile.created_at,
         updatedAt: finalUserProfile.updated_at,
       },
     });
 
   } catch (error) {
-    console.error('🚨 Auth check error:', error);
+    console.error('🚨 Session check error:', error);
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }
