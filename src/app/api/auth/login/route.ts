@@ -35,8 +35,17 @@ export async function POST(request: NextRequest) {
 
     if (authError) {
       console.error('❌ Supabase auth error:', authError);
+      console.error('❌ Full auth error details:', {
+        message: authError.message,
+        status: authError.status,
+        code: authError.code
+      });
       return NextResponse.json(
-        { success: false, error: 'Invalid email or password' },
+        { 
+          success: false, 
+          error: 'Invalid email or password',
+          debug: process.env.NODE_ENV === 'development' ? authError.message : undefined
+        },
         { status: 401 }
       );
     }

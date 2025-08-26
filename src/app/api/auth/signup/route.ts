@@ -91,6 +91,7 @@ export async function POST(request: NextRequest) {
           birth_year: birthYear,
           user_type: userType,
         },
+        emailRedirectTo: undefined, // Disable email confirmation for now
       },
     });
 
@@ -124,7 +125,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('✅ User created successfully:', authData.user.id);
+    console.log('✅ User created successfully:', {
+      userId: authData.user.id,
+      email: authData.user.email,
+      emailConfirmed: authData.user.email_confirmed_at,
+      hasSession: !!authData.session,
+      sessionExpires: authData.session?.expires_at
+    });
 
     // Create user profile in our users table
     const { error: profileError } = await supabase

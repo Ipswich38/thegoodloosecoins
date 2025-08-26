@@ -295,15 +295,15 @@ function HeroContent() {
 
           {/* Right Side - Authentication Form */}
           <div className="lg:col-span-1">
-            <div className="bg-teal-700 p-6 rounded-xl shadow-xl border border-teal-600">
+            <div className="bg-white p-6 rounded-xl shadow-xl border border-gray-100" style={{ boxShadow: '0 0 30px rgba(64, 224, 208, 0.3)' }}>
               <div className="text-center mb-6">
                 <div className="flex justify-center mb-3">
-                  <Coins className="h-8 w-8 text-yellow-300" />
+                  <Coins className="h-8 w-8 text-primary-600" />
                 </div>
-                <h2 className="text-2xl font-bold text-white mb-2">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">
                   {authMode === 'signup' ? 'Join The Community' : 'Welcome Back'}
                 </h2>
-                <p className="text-teal-100 text-sm">
+                <p className="text-gray-600 text-sm">
                   {authMode === 'signup' ? 'Start making a difference today' : 'Continue your impact journey'}
                 </p>
               </div>
@@ -319,7 +319,7 @@ function HeroContent() {
                 <form onSubmit={handleSignupSubmit} className="space-y-4">
                   {/* User Type Selection */}
                   <div>
-                    <label className="block text-sm font-medium text-teal-100 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       I want to
                     </label>
                     <div className="grid grid-cols-2 gap-2">
@@ -364,7 +364,7 @@ function HeroContent() {
 
                   {/* Email */}
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-teal-100 mb-1">
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                       Email Address
                     </label>
                     <div className="relative">
@@ -389,7 +389,7 @@ function HeroContent() {
 
                   {/* Username */}
                   <div>
-                    <label htmlFor="username" className="block text-sm font-medium text-teal-100 mb-1">
+                    <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
                       Username
                     </label>
                     <div className="relative">
@@ -414,7 +414,7 @@ function HeroContent() {
 
                   {/* Birth Year */}
                   <div>
-                    <label htmlFor="birthYear" className="block text-sm font-medium text-teal-100 mb-1">
+                    <label htmlFor="birthYear" className="block text-sm font-medium text-gray-700 mb-1">
                       Birth Year
                     </label>
                     <div className="relative">
@@ -441,7 +441,7 @@ function HeroContent() {
 
                   {/* Password */}
                   <div>
-                    <label htmlFor="password" className="block text-sm font-medium text-teal-100 mb-1">
+                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                       Password
                     </label>
                     <div className="relative">
@@ -478,7 +478,7 @@ function HeroContent() {
 
                   {/* Confirm Password */}
                   <div>
-                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-teal-100 mb-1">
+                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
                       Confirm Password
                     </label>
                     <div className="relative">
@@ -517,7 +517,7 @@ function HeroContent() {
                   <button
                     type="submit"
                     disabled={isAuthLoading}
-                    className="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:bg-orange-300 disabled:cursor-not-allowed flex items-center justify-center shadow-lg"
+                    className="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:bg-primary-300 disabled:cursor-not-allowed flex items-center justify-center shadow-lg"
                   >
                     {isAuthLoading ? (
                       <>
@@ -536,7 +536,7 @@ function HeroContent() {
                 <form onSubmit={handleLoginSubmit} className="space-y-4">
                   {/* Email */}
                   <div>
-                    <label htmlFor="loginEmail" className="block text-sm font-medium text-teal-100 mb-1">
+                    <label htmlFor="loginEmail" className="block text-sm font-medium text-gray-700 mb-1">
                       Email Address
                     </label>
                     <div className="relative">
@@ -561,7 +561,7 @@ function HeroContent() {
 
                   {/* Password */}
                   <div>
-                    <label htmlFor="loginPassword" className="block text-sm font-medium text-teal-100 mb-1">
+                    <label htmlFor="loginPassword" className="block text-sm font-medium text-gray-700 mb-1">
                       Password
                     </label>
                     <div className="relative">
@@ -600,7 +600,7 @@ function HeroContent() {
                   <div className="text-right">
                     <a 
                       href="/forgot-password" 
-                      className="text-sm text-orange-300 hover:text-orange-200 hover:underline"
+                      className="text-sm text-primary-600 hover:text-primary-700 hover:underline"
                     >
                       Forgot your password?
                     </a>
@@ -610,7 +610,7 @@ function HeroContent() {
                   <button
                     type="submit"
                     disabled={isAuthLoading}
-                    className="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:bg-orange-300 disabled:cursor-not-allowed flex items-center justify-center shadow-lg"
+                    className="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:bg-primary-300 disabled:cursor-not-allowed flex items-center justify-center shadow-lg"
                   >
                     {isAuthLoading ? (
                       <>
@@ -629,7 +629,7 @@ function HeroContent() {
                   <div className="text-center">
                     <a
                       href="/forgot-password"
-                      className="text-sm text-orange-300 hover:text-orange-200 font-medium"
+                      className="text-sm text-primary-600 hover:text-primary-700 font-medium"
                     >
                       Forgot your password?
                     </a>
@@ -644,7 +644,7 @@ function HeroContent() {
                     setAuthMode(authMode === 'signup' ? 'login' : 'signup');
                     setAuthErrors({});
                   }}
-                  className="text-orange-300 hover:text-orange-200 font-medium text-sm"
+                  className="text-primary-600 hover:text-primary-700 font-medium text-sm"
                   disabled={isAuthLoading}
                 >
                   {authMode === 'signup' ? 'Already have an account? Sign in' : 'New here? Create account'}
@@ -653,8 +653,8 @@ function HeroContent() {
 
               {/* Privacy Note */}
               {authMode === 'signup' && (
-                <div className="mt-4 p-3 bg-teal-600 border border-teal-500 rounded-lg">
-                  <p className="text-teal-100 text-xs text-center">
+                <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-blue-800 text-xs text-center">
                     🔒 We only collect essential information. You must be 13+ to participate independently, or have a guardian create an account.
                   </p>
                 </div>
@@ -674,19 +674,19 @@ export default function Hero() {
         <div className="max-w-6xl mx-auto">
           <div className="grid lg:grid-cols-3 gap-12 items-center">
             <div className="lg:col-span-2 text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-400 mx-auto mb-4"></div>
-              <p className="text-teal-100">Loading...</p>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading...</p>
             </div>
             <div className="lg:col-span-1">
-              <div className="bg-teal-700 p-6 rounded-xl shadow-xl border border-teal-600 text-center">
+              <div className="bg-white p-6 rounded-xl shadow-xl border border-gray-100 text-center" style={{ boxShadow: '0 0 30px rgba(64, 224, 208, 0.3)' }}>
                 <div className="animate-pulse">
-                  <div className="h-8 w-8 bg-teal-500 rounded mx-auto mb-4"></div>
-                  <div className="h-6 bg-teal-500 rounded mb-2"></div>
-                  <div className="h-4 bg-teal-500 rounded mb-4"></div>
+                  <div className="h-8 w-8 bg-gray-300 rounded mx-auto mb-4"></div>
+                  <div className="h-6 bg-gray-300 rounded mb-2"></div>
+                  <div className="h-4 bg-gray-300 rounded mb-4"></div>
                   <div className="space-y-4">
-                    <div className="h-12 bg-teal-500 rounded"></div>
-                    <div className="h-12 bg-teal-500 rounded"></div>
-                    <div className="h-12 bg-teal-500 rounded"></div>
+                    <div className="h-12 bg-gray-300 rounded"></div>
+                    <div className="h-12 bg-gray-300 rounded"></div>
+                    <div className="h-12 bg-gray-300 rounded"></div>
                   </div>
                 </div>
               </div>
