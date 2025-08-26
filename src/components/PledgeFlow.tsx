@@ -79,22 +79,29 @@ export default function PledgeFlow({ beneficiaries }: PledgeFlowProps) {
   return (
     <div className="bg-white rounded-xl shadow-sm border p-6">
       {/* Step Indicator */}
-      <div className="flex items-center justify-center mb-8">
-        <div className="flex items-center space-x-2">
-          {(['select-beneficiary', 'count-coins', 'enter-username', 'confirm'] as const).map((step, index) => (
-            <div key={step} className="flex items-center">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                currentStep === step ? 'bg-primary-600 text-white' :
-                index < (['select-beneficiary', 'count-coins', 'enter-username', 'confirm'] as const).indexOf(currentStep) ? 'bg-primary-200 text-primary-800' :
-                'bg-gray-200 text-gray-600'
-              }`}>
-                {index + 1}
-              </div>
-              {index < 3 && <div className="w-8 h-0.5 bg-gray-200" />}
-            </div>
-          ))}
+      {currentStep !== 'success' && (
+        <div className="flex items-center justify-center mb-8">
+          <div className="flex items-center space-x-2">
+            {(['select-beneficiary', 'count-coins', 'enter-username', 'confirm'] as const).map((step, index) => {
+              const steps = ['select-beneficiary', 'count-coins', 'enter-username', 'confirm'] as const;
+              const currentIndex = steps.indexOf(currentStep as any);
+              
+              return (
+                <div key={step} className="flex items-center">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                    currentStep === step ? 'bg-primary-600 text-white' :
+                    index < currentIndex ? 'bg-primary-200 text-primary-800' :
+                    'bg-gray-200 text-gray-600'
+                  }`}>
+                    {index + 1}
+                  </div>
+                  {index < 3 && <div className="w-8 h-0.5 bg-gray-200" />}
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Step 1: Select Beneficiary */}
       {currentStep === 'select-beneficiary' && (

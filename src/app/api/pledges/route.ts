@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = createSupabaseClient();
+    const supabase = await createSupabaseClient();
 
     // Create the pledge
     const { data: pledge, error: pledgeError } = await supabase
@@ -186,7 +186,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const supabase = createSupabaseClient();
+    const supabase = await createSupabaseClient();
 
     // Get user's pledges
     const { data: pledges, error } = await supabase

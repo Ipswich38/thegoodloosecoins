@@ -17,7 +17,7 @@ export async function getCurrentUser(request: NextRequest): Promise<Authenticate
       return null;
     }
 
-    const supabase = createClient();
+    const supabase = await createClient();
 
     // Set the session using the tokens
     if (authToken && refreshToken) {
@@ -85,6 +85,6 @@ export async function getCurrentUser(request: NextRequest): Promise<Authenticate
   }
 }
 
-export function createSupabaseClient() {
-  return createClient();
+export async function createSupabaseClient() {
+  return await createClient();
 }
