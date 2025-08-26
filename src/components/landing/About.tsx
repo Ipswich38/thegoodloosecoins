@@ -1,4 +1,5 @@
-import { Target, Users, Heart, Coins, BookOpen, Utensils } from 'lucide-react';
+import { Target, Users, Heart, BookOpen, Utensils } from 'lucide-react';
+import Image from 'next/image';
 
 export default function About() {
   return (
@@ -22,7 +23,15 @@ export default function About() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
           <div className="bg-white p-6 rounded-lg shadow-lg">
             <div className="bg-blue-100 p-4 rounded-full inline-flex mb-4">
-              <Coins className="h-8 w-8 text-blue-600" />
+              <div className="w-8 h-8">
+                <Image 
+                  src="/th good loose coins (3).png" 
+                  alt="Coins" 
+                  width={32}
+                  height={32}
+                  className="w-full h-full object-contain"
+                />
+              </div>
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-4">Mission 1: Coin Circulation</h3>
             <p className="text-gray-600">

@@ -1,13 +1,20 @@
-import { ArrowRight, Coins } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Hero() {
   return (
     <section id="hero" className="bg-gradient-to-br from-primary-50 via-white to-secondary-50 py-20 px-4">
       <div className="max-w-4xl mx-auto text-center">
         <div className="flex justify-center mb-8">
-          <div className="bg-primary-500 p-6 rounded-full">
-            <Coins className="h-16 w-16 text-white" />
+          <div className="w-32 h-32">
+            <Image 
+              src="/th good loose coins (3).png" 
+              alt="The Good Loose Coins Logo" 
+              width={128}
+              height={128}
+              className="w-full h-full object-contain"
+            />
           </div>
         </div>
         

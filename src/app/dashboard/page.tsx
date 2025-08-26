@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Coins, Users, Award, TrendingUp } from 'lucide-react';
+import { Users, Award, TrendingUp } from 'lucide-react';
+import Image from 'next/image';
 import PledgeFlow from '@/components/PledgeFlow';
 import Leaderboard from '@/components/Leaderboard';
 
@@ -78,8 +79,14 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="bg-primary-500 p-2 rounded-full">
-                <Coins className="h-6 w-6 text-white" />
+              <div className="w-8 h-8">
+                <Image 
+                  src="/th good loose coins (3).png" 
+                  alt="The Good Loose Coins Logo" 
+                  width={32}
+                  height={32}
+                  className="w-full h-full object-contain"
+                />
               </div>
               <h1 className="text-xl font-bold text-gray-900">The Good Loose Coins</h1>
             </div>
@@ -108,7 +115,15 @@ export default function Dashboard() {
           <div className="bg-white p-6 rounded-xl shadow-sm border">
             <div className="flex items-center">
               <div className="bg-green-100 p-3 rounded-full">
-                <Coins className="h-6 w-6 text-green-600" />
+                <div className="w-6 h-6">
+                  <Image 
+                    src="/th good loose coins (3).png" 
+                    alt="Coins" 
+                    width={24}
+                    height={24}
+                    className="w-full h-full object-contain"
+                  />
+                </div>
               </div>
               <div className="ml-4">
                 <p className="text-sm text-gray-600">Total Pledged</p>

@@ -2,7 +2,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { Coins, Menu, X, User as UserIcon, LogOut } from 'lucide-react';
+import { Menu, X, User as UserIcon, LogOut } from 'lucide-react';
+import Image from 'next/image';
 import { User } from '@/types/auth';
 
 export default function Header() {
@@ -52,8 +53,14 @@ export default function Header() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <div className="bg-primary-500 p-2 rounded-full">
-              <Coins className="h-6 w-6 text-white" />
+            <div className="w-10 h-10">
+              <Image 
+                src="/th good loose coins (3).png" 
+                alt="The Good Loose Coins Logo" 
+                width={40}
+                height={40}
+                className="w-full h-full object-contain"
+              />
             </div>
             <span className="font-bold text-xl text-gray-900">TG/LC</span>
           </Link>

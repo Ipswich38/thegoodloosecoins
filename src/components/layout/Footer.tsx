@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { Coins, Mail, Shield, FileText } from 'lucide-react';
+import { Mail, Shield, FileText } from 'lucide-react';
+import Image from 'next/image';
 
 export default function Footer() {
   return (
@@ -9,8 +10,14 @@ export default function Footer() {
           {/* Logo and Description */}
           <div className="md:col-span-2">
             <div className="flex items-center gap-2 mb-4">
-              <div className="bg-primary-500 p-2 rounded-full">
-                <Coins className="h-6 w-6 text-white" />
+              <div className="w-10 h-10">
+                <Image 
+                  src="/th good loose coins (3).png" 
+                  alt="The Good Loose Coins Logo" 
+                  width={40}
+                  height={40}
+                  className="w-full h-full object-contain"
+                />
               </div>
               <span className="font-bold text-xl">The Good Loose Coins</span>
             </div>
