@@ -1,67 +1,114 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { createClient } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
-  console.log('🔍 NEW CLEAN AUTH CHECK');
+  console.log('🔍 Checking authentication with Supabase Auth');
   
   try {
-    const sessionToken = request.cookies.get('session-token')?.value;
-    const userId = request.cookies.get('user-id')?.value;
+    const authToken = request.cookies.get('supabase-auth-token')?.value;
+    const refreshToken = request.cookies.get('supabase-refresh-token')?.value;
 
-    console.log('🍪 Cookies:', {
-      hasSessionToken: !!sessionToken,
-      userId: userId
+    console.log('🍪 Auth cookies:', {
+      hasAuthToken: !!authToken,
+      hasRefreshToken: !!refreshToken,
     });
 
-    if (!sessionToken || !userId) {
+    if (!authToken) {
       return NextResponse.json(
         { success: false, error: 'No session found' },
         { status: 401 }
       );
     }
 
-    // Get user from database
-    try {
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: {
-          id: true,
-          username: true,
-          email: true,
-          type: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-      });
+    const supabase = createClient();
 
-      if (!user) {
+    // Set the session using the tokens
+    if (authToken && refreshToken) {
+      await supabase.auth.setSession({
+        access_token: authToken,
+        refresh_token: refreshToken,
+      });
+    }
+
+    // Get current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser(authToken);
+
+    if (userError || !user) {
+      console.error('❌ Auth error:', userError);
+      return NextResponse.json(
+        { success: false, error: 'Invalid session' },
+        { status: 401 }
+      );
+    }
+
+    // Get user profile from our users table
+    const { data: userProfile, error: profileError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError && profileError.code !== 'PGRST116') { // PGRST116 = no rows returned
+      console.error('❌ Profile fetch error:', profileError);
+      return NextResponse.json(
+        { success: false, error: 'Failed to load user profile' },
+        { status: 500 }
+      );
+    }
+
+    // Create profile if it doesn't exist
+    let finalUserProfile = userProfile;
+    
+    if (!finalUserProfile) {
+      console.log('👤 Creating missing profile for user:', user.id);
+      const { error: createError } = await supabase
+        .from('users')
+        .insert({
+          id: user.id,
+          username: user.user_metadata?.username || user.email?.split('@')[0] || 'User',
+          email: user.email,
+          type: user.user_metadata?.user_type || 'DONOR',
+        });
+
+      if (createError) {
+        console.error('❌ Profile creation error:', createError);
+      }
+
+      // Retry fetching profile
+      const { data: retryProfile } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (!retryProfile) {
         return NextResponse.json(
-          { success: false, error: 'User not found' },
-          { status: 404 }
+          { success: false, error: 'Failed to create user profile' },
+          { status: 500 }
         );
       }
 
-      console.log('✅ Auth check successful:', user.username, user.type);
-
-      return NextResponse.json({
-        success: true,
-        user: {
-          ...user,
-          createdAt: user.createdAt.toISOString(),
-          updatedAt: user.updatedAt.toISOString(),
-        },
-      });
-    } catch (dbError) {
-      console.error('Database error in auth check:', dbError);
-      return NextResponse.json(
-        { success: false, error: 'Database temporarily unavailable' },
-        { status: 503 }
-      );
+      finalUserProfile = retryProfile;
     }
+    
+    console.log('✅ Auth check successful:', user.email, finalUserProfile.type);
+
+    return NextResponse.json({
+      success: true,
+      user: {
+        id: user.id,
+        username: finalUserProfile.username,
+        email: user.email,
+        type: finalUserProfile.type,
+        createdAt: finalUserProfile.created_at,
+        updatedAt: finalUserProfile.updated_at,
+      },
+    });
+
   } catch (error) {
-    console.error('Auth check error:', error);
+    console.error('🚨 Auth check error:', error);
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

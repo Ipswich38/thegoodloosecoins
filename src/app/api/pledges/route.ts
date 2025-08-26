@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+import { getCurrentUser, createSupabaseClient } from '@/lib/auth-server';
 // Force this route to be dynamic
 export const dynamic = 'force-dynamic';
-import { prisma } from '@/lib/prisma';
 import { 
   CreatePledgeRequest, 
   PledgeResponse, 
@@ -14,18 +13,6 @@ import {
   PledgeError 
 } from '@/types/pledge';
 
-async function getCurrentUser() {
-  const cookieStore = await cookies();
-  const userId = cookieStore.get('user-id')?.value;
-  
-  if (!userId) return null;
-
-  const dbUser = await prisma.user.findUnique({
-    where: { id: userId },
-  });
-
-  return dbUser;
-}
 
 function validatePledgeAmount(amount: number): PledgeError | null {
   if (typeof amount !== 'number' || isNaN(amount)) {
@@ -80,7 +67,7 @@ function calculatePledgePoints(amount: number): number {
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await getCurrentUser();
+    const user = await getCurrentUser(request);
 
     if (!user) {
       return NextResponse.json(
@@ -108,52 +95,65 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create pledge in database transaction
-    const result = await prisma.$transaction(async (tx) => {
-      // Create the pledge
-      const pledge = await tx.pledge.create({
-        data: {
-          donorId: user.id,
-          amount,
-          status: 'TASK1_COMPLETE', // Task 1 is automatically completed on creation
-        },
-        include: {
-          donor: {
-            select: {
-              id: true,
-              username: true,
-              email: true,
-            }
-          }
-        }
-      });
+    const supabase = createSupabaseClient();
 
-      // Award points for pledge creation and task 1 completion
-      const points = calculatePledgePoints(amount);
-      
-      // Update or create social impact points
-      await tx.socialImpactPoint.upsert({
-        where: { userId: user.id },
-        update: {
-          points: {
-            increment: points
+    // Create the pledge
+    const { data: pledge, error: pledgeError } = await supabase
+      .from('pledges')
+      .insert({
+        donor_id: user.id,
+        amount,
+        status: 'TASK1_COMPLETE', // Task 1 is automatically completed on creation
+      })
+      .select('*')
+      .single();
+
+    if (pledgeError || !pledge) {
+      console.error('❌ Pledge creation error:', pledgeError);
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Failed to create pledge'
           }
         },
-        create: {
-          userId: user.id,
-          points
-        }
+        { status: 500 }
+      );
+    }
+
+    // Award points for pledge creation and task 1 completion
+    const points = calculatePledgePoints(amount);
+    
+    // Update or create social impact points
+    const { error: pointsError } = await supabase
+      .from('social_impact_points')
+      .upsert({
+        user_id: user.id,
+        points: points
+      }, {
+        onConflict: 'user_id'
       });
 
-      return pledge;
-    });
+    if (pointsError) {
+      console.error('⚠️ Points update error:', pointsError);
+      // Don't fail pledge creation for points error
+    }
 
     const response: PledgeResponse = {
       success: true,
       pledge: {
-        ...result,
-        createdAt: result.createdAt.toISOString(),
-        updatedAt: result.updatedAt.toISOString(),
+        id: pledge.id,
+        donorId: pledge.donor_id,
+        amount: pledge.amount,
+        status: pledge.status,
+        createdAt: pledge.created_at,
+        updatedAt: pledge.updated_at,
+        donor: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+        }
       },
       message: 'Pledge created successfully'
     };
@@ -177,7 +177,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await getCurrentUser();
+    const user = await getCurrentUser(request);
 
     if (!user) {
       return NextResponse.json(
@@ -186,100 +186,45 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const { searchParams } = new URL(request.url);
-    
-    // Parse filters
-    const filters: PledgeFilters = {
-      status: searchParams.get('status') as any,
-      dateFrom: searchParams.get('dateFrom') || undefined,
-      dateTo: searchParams.get('dateTo') || undefined,
-      minAmount: searchParams.get('minAmount') ? parseFloat(searchParams.get('minAmount')!) : undefined,
-      maxAmount: searchParams.get('maxAmount') ? parseFloat(searchParams.get('maxAmount')!) : undefined,
-    };
+    const supabase = createSupabaseClient();
 
-    // Parse pagination
-    const pagination: PaginationParams = {
-      page: searchParams.get('page') ? parseInt(searchParams.get('page')!) : 1,
-      limit: searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 10,
-      sortBy: (searchParams.get('sortBy') as any) || 'createdAt',
-      sortOrder: (searchParams.get('sortOrder') as any) || 'desc',
-    };
+    // Get user's pledges
+    const { data: pledges, error } = await supabase
+      .from('pledges')
+      .select('*')
+      .eq('donor_id', user.id)
+      .order('created_at', { ascending: false });
 
-    // Build where clause
-    const where: any = {};
-
-    if (user.type === 'DONOR') {
-      where.donorId = user.id;
-    } else {
-      // For donees, show pledges where donations exist for them or could be created
-      // This is more complex and might need adjustment based on business logic
-      where.status = { in: ['TASK2_COMPLETE', 'COMPLETED'] };
-    }
-
-    if (filters.status) where.status = filters.status;
-    if (filters.dateFrom || filters.dateTo) {
-      where.createdAt = {};
-      if (filters.dateFrom) where.createdAt.gte = new Date(filters.dateFrom);
-      if (filters.dateTo) where.createdAt.lte = new Date(filters.dateTo);
-    }
-    if (filters.minAmount || filters.maxAmount) {
-      where.amount = {};
-      if (filters.minAmount) where.amount.gte = filters.minAmount;
-      if (filters.maxAmount) where.amount.lte = filters.maxAmount;
-    }
-
-    // Calculate skip for pagination
-    const skip = (pagination.page! - 1) * pagination.limit!;
-
-    // Build orderBy
-    const orderBy = {
-      [pagination.sortBy!]: pagination.sortOrder
-    };
-
-    // Get pledges with total count
-    const [pledges, total] = await Promise.all([
-      prisma.pledge.findMany({
-        where,
-        include: {
-          donor: {
-            select: {
-              id: true,
-              username: true,
-              email: true,
-            }
-          },
-          donations: {
-            include: {
-              beneficiary: {
-                select: {
-                  id: true,
-                  username: true,
-                  email: true,
-                }
-              }
-            }
+    if (error) {
+      console.error('Error fetching pledges:', error);
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: 'Failed to fetch pledges'
           }
         },
-        orderBy,
-        skip,
-        take: pagination.limit,
-      }),
-      prisma.pledge.count({ where })
-    ]);
+        { status: 500 }
+      );
+    }
 
     const response: PledgesResponse = {
       success: true,
       pledges: pledges.map(pledge => ({
-        ...pledge,
-        createdAt: pledge.createdAt.toISOString(),
-        updatedAt: pledge.updatedAt.toISOString(),
-        donations: pledge.donations?.map(donation => ({
-          ...donation,
-          createdAt: donation.createdAt.toISOString(),
-          updatedAt: donation.updatedAt.toISOString(),
-        }))
+        id: pledge.id,
+        donorId: pledge.donor_id,
+        amount: pledge.amount,
+        status: pledge.status,
+        createdAt: pledge.created_at,
+        updatedAt: pledge.updated_at,
+        donor: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+        }
       })),
-      total,
+      total: pledges.length,
     };
 
     return NextResponse.json(response);

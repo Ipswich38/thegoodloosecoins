@@ -1,141 +1,117 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { createClient } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 
-// Simple access codes for each user (in production, these would be in the database)
-const ACCESS_CODES: Record<string, string> = {
-  'testdonor': '123456',
-  'testdonee': '654321', 
-  'admin': '999999'
-};
-
 export async function POST(request: NextRequest) {
   try {
-    const { username, passcode } = await request.json();
+    const { email, password } = await request.json();
 
-    console.log('Login attempt:', { username, passcode: passcode ? '***' : 'missing' });
+    console.log('🔐 Login attempt with Supabase Auth:', { email });
 
     // Validate input
-    if (!username || !passcode) {
+    if (!email || !password) {
       return NextResponse.json(
-        { success: false, error: 'Username and passcode are required' },
+        { success: false, error: 'Email and password are required' },
         { status: 400 }
       );
     }
 
-    // Validate passcode format (6 digits)
-    if (!/^\d{6}$/.test(passcode)) {
-      return NextResponse.json(
-        { success: false, error: 'Passcode must be exactly 6 digits' },
-        { status: 400 }
-      );
-    }
+    const supabase = createClient();
 
-    // Check access code
-    const lowerUsername = username.toLowerCase();
-    const expectedPasscode = ACCESS_CODES[lowerUsername];
-    
-    if (!expectedPasscode || expectedPasscode !== passcode) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid username or access code' },
-        { status: 401 }
-      );
-    }
-
-    // Find user in database
-    const user = await prisma.user.findFirst({
-      where: {
-        username: {
-          equals: username,
-          mode: 'insensitive'
-        }
-      },
-      select: {
-        id: true,
-        username: true,
-        email: true,
-        type: true,
-        createdAt: true
-      }
+    // Sign in with Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
     });
 
-    if (!user) {
+    if (authError) {
+      console.error('❌ Supabase auth error:', authError);
       return NextResponse.json(
-        { success: false, error: 'User not found in database' },
+        { success: false, error: 'Invalid email or password' },
         { status: 401 }
       );
     }
 
-    console.log('Login successful for:', user.username);
+    if (!authData.user || !authData.session) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication failed' },
+        { status: 401 }
+      );
+    }
 
-    // Create session
-    const sessionToken = crypto.randomUUID();
-    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+    // Get user profile from our users table
+    const { data: userProfile, error: profileError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', authData.user.id)
+      .single();
+
+    if (profileError || !userProfile) {
+      console.error('❌ Profile fetch error:', profileError);
+      // Create profile if it doesn't exist
+      const { error: createError } = await supabase
+        .from('users')
+        .insert({
+          id: authData.user.id,
+          username: authData.user.user_metadata?.username || authData.user.email?.split('@')[0] || 'User',
+          email: authData.user.email,
+          type: authData.user.user_metadata?.user_type || 'DONOR',
+        });
+
+      if (createError) {
+        console.error('❌ Profile creation error:', createError);
+      }
+
+      // Retry fetching profile
+      const { data: retryProfile } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', authData.user.id)
+        .single();
+
+      if (!retryProfile) {
+        return NextResponse.json(
+          { success: false, error: 'Failed to load user profile' },
+          { status: 500 }
+        );
+      }
+    }
+
+    console.log('✅ Login successful for:', authData.user.email);
 
     const response = NextResponse.json({
       success: true,
       message: 'Login successful!',
       user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        type: user.type
-      }
+        id: authData.user.id,
+        username: userProfile?.username || authData.user.user_metadata?.username,
+        email: authData.user.email,
+        type: userProfile?.type || authData.user.user_metadata?.user_type || 'DONOR',
+      },
     });
 
-    // Set authentication cookies
-    response.cookies.set('session-token', sessionToken, {
+    // Set auth cookies for session management
+    response.cookies.set('supabase-auth-token', authData.session.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      expires: expiresAt,
-      path: '/'
+      expires: new Date(authData.session.expires_at! * 1000),
+      path: '/',
     });
 
-    response.cookies.set('user-id', user.id, {
+    response.cookies.set('supabase-refresh-token', authData.session.refresh_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      expires: expiresAt,
-      path: '/'
-    });
-
-    response.cookies.set('user-type', user.type, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      expires: expiresAt,
-      path: '/'
+      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+      path: '/',
     });
 
     return response;
 
   } catch (error) {
-    console.error('Login error:', error);
-    
-    // Handle specific database connection errors
-    if (error instanceof Error) {
-      if (error.message.includes('connect') || error.message.includes('timeout')) {
-        return NextResponse.json(
-          { success: false, error: 'Database connection failed. Please try again.' },
-          { status: 503 }
-        );
-      }
-      
-      // Log the specific error for debugging
-      console.error('Detailed login error:', {
-        message: error.message,
-        stack: error.stack,
-        name: error.name
-      });
-      
-      return NextResponse.json(
-        { success: false, error: `Login failed: ${error.message}` },
-        { status: 500 }
-      );
-    }
-    
+    console.error('🚨 Login error:', error);
     return NextResponse.json(
       { success: false, error: 'Login failed. Please try again.' },
       { status: 500 }
