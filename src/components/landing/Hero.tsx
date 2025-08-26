@@ -162,6 +162,12 @@ function HeroContent() {
       }
 
       if (data.user) {
+        console.log('✅ User created in Auth:', {
+          id: data.user.id,
+          email: data.user.email,
+          confirmed: data.user.email_confirmed_at,
+        });
+        
         // Create user profile in our database
         const { error: profileError } = await supabase
           .from('users')
@@ -175,6 +181,12 @@ function HeroContent() {
 
         if (profileError) {
           console.error('❌ Profile creation error:', profileError);
+          setAuthErrors({ 
+            general: 'Account created but profile setup failed. Please try logging in.' 
+          });
+          return;
+        } else {
+          console.log('✅ User profile created successfully');
         }
 
         // Initialize social impact points
@@ -188,6 +200,14 @@ function HeroContent() {
         if (pointsError) {
           console.error('⚠️ Points initialization error:', pointsError);
         }
+
+        // Check if we have a session
+        const { data: sessionData } = await supabase.auth.getSession();
+        console.log('🔍 Session after signup:', {
+          hasSession: !!sessionData.session,
+          hasUser: !!sessionData.session?.user,
+          userId: sessionData.session?.user?.id,
+        });
 
         setSignupSuccess(true);
         console.log('🎉 Signup successful, starting redirect timer...');

@@ -1,7 +1,9 @@
-import { updateSession } from './src/lib/supabase/middleware'
+import { NextResponse } from 'next/server'
 
 export async function middleware(request: any) {
-  return await updateSession(request)
+  // Temporarily disable middleware for debugging
+  console.log('🔍 Middleware called for:', request.nextUrl.pathname)
+  return NextResponse.next()
 }
 
 export const config = {

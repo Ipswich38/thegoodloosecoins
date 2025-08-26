@@ -10,6 +10,7 @@ export type Database = {
           username: string;
           email: string | null;
           type: 'DONOR' | 'DONEE';
+          birth_year?: number | null;
           created_at: string;
           updated_at: string;
         };
@@ -18,6 +19,7 @@ export type Database = {
           username: string;
           email?: string | null;
           type: 'DONOR' | 'DONEE';
+          birth_year?: number | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -26,6 +28,7 @@ export type Database = {
           username?: string;
           email?: string | null;
           type?: 'DONOR' | 'DONEE';
+          birth_year?: number | null;
           created_at?: string;
           updated_at?: string;
         };

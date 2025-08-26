@@ -23,12 +23,27 @@ export default function DashboardPage() {
         console.log('📋 Session check:', {
           hasSession: !!session,
           hasUser: !!session?.user,
-          sessionError: sessionError?.message
+          sessionError: sessionError?.message,
+          userEmail: session?.user?.email,
+          userId: session?.user?.id,
+          sessionExpires: session?.expires_at
         });
 
-        if (sessionError || !session || !session.user) {
-          console.log('❌ No valid session - redirecting to home');
-          router.push('/?message=' + encodeURIComponent('Please log in to access your dashboard.'));
+        if (sessionError) {
+          console.error('❌ Session error:', sessionError);
+          router.push('/?message=' + encodeURIComponent('Session error: ' + sessionError.message));
+          return;
+        }
+
+        if (!session) {
+          console.log('❌ No session found - redirecting to home');
+          router.push('/?message=' + encodeURIComponent('No session found. Please log in to access your dashboard.'));
+          return;
+        }
+
+        if (!session.user) {
+          console.log('❌ No user in session - redirecting to home');
+          router.push('/?message=' + encodeURIComponent('No user found in session. Please log in to access your dashboard.'));
           return;
         }
 
