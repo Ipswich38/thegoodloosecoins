@@ -7,12 +7,12 @@ export default function Hero() {
     <section id="hero" className="bg-white py-24 px-6">
       <div className="max-w-5xl mx-auto text-center">
         <div className="flex justify-center mb-12">
-          <div className="w-20 h-20 md:w-24 md:h-24">
+          <div className="w-32 h-32 md:w-40 md:h-40">
             <Image 
-              src="/tglc_logo.svg" 
+              src="/tglc_logo_clean.svg" 
               alt="The Good Loose Coins Logo" 
-              width={96}
-              height={96}
+              width={160}
+              height={160}
               className="w-full h-full object-contain"
             />
           </div>
