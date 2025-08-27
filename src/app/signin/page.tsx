@@ -78,7 +78,7 @@ export default function SignIn() {
           
           <div className="w-16 h-16 mx-auto mb-6">
             <Image 
-              src="/th good loose coins (3).png" 
+              src="/th good loose coins (4).png" 
               alt="The Good Loose Coins Logo" 
               width={64}
               height={64}

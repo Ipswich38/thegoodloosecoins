@@ -179,7 +179,7 @@ export default function BeneficiaryDashboard() {
               <div className="bg-primary-100 p-3 rounded-full">
                 <div className="w-6 h-6">
                   <Image 
-                    src="/th good loose coins (3).png" 
+                    src="/th good loose coins (4).png" 
                     alt="Coins" 
                     width={24}
                     height={24}
@@ -205,7 +205,7 @@ export default function BeneficiaryDashboard() {
               <div className="bg-gray-100 p-4 rounded-full inline-flex mb-4">
                 <div className="w-8 h-8">
                   <Image 
-                    src="/th good loose coins (3).png" 
+                    src="/th good loose coins (4).png" 
                     alt="Coins" 
                     width={32}
                     height={32}

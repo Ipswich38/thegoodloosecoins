@@ -25,7 +25,7 @@ export default function About() {
             <div className="bg-blue-100 p-4 rounded-full inline-flex mb-4">
               <div className="w-8 h-8">
                 <Image 
-                  src="/th good loose coins (3).png" 
+                  src="/th good loose coins (4).png" 
                   alt="Coins" 
                   width={32}
                   height={32}

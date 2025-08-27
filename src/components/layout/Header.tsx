@@ -55,7 +55,7 @@ export default function Header() {
           <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="w-12 h-12">
               <Image 
-                src="/tglc_logo_clean.svg" 
+                src="/th good loose coins (4).png" 
                 alt="The Good Loose Coins Logo" 
                 width={48}
                 height={48}

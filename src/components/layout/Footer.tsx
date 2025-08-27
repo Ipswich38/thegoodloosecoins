@@ -12,7 +12,7 @@ export default function Footer() {
             <div className="flex items-center gap-2 mb-4">
               <div className="w-10 h-10">
                 <Image 
-                  src="/th good loose coins (3).png" 
+                  src="/th good loose coins (4).png" 
                   alt="The Good Loose Coins Logo" 
                   width={40}
                   height={40}

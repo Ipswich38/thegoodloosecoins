@@ -86,7 +86,7 @@ export default function Dashboard() {
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8">
                 <Image 
-                  src="/th good loose coins (3).png" 
+                  src="/th good loose coins (4).png" 
                   alt="The Good Loose Coins Logo" 
                   width={32}
                   height={32}
@@ -139,7 +139,7 @@ export default function Dashboard() {
               <div className="bg-green-100 p-3 rounded-full">
                 <div className="w-6 h-6">
                   <Image 
-                    src="/th good loose coins (3).png" 
+                    src="/th good loose coins (4).png" 
                     alt="Coins" 
                     width={24}
                     height={24}

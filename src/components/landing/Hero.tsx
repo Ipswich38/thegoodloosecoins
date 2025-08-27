@@ -9,7 +9,7 @@ export default function Hero() {
         <div className="flex justify-center mb-12">
           <div className="w-32 h-32 md:w-40 md:h-40">
             <Image 
-              src="/tglc_logo_clean.svg" 
+              src="/th good loose coins (4).png" 
               alt="The Good Loose Coins Logo" 
               width={160}
               height={160}

@@ -248,7 +248,7 @@ export default function DonorAccount() {
               <div className="bg-orange-100 p-3 rounded-full">
                 <div className="w-6 h-6">
                   <Image 
-                    src="/th good loose coins (3).png" 
+                    src="/th good loose coins (4).png" 
                     alt="Impact Points" 
                     width={24}
                     height={24}
