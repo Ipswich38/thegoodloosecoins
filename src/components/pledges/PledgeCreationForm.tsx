@@ -143,7 +143,10 @@ export default function PledgeCreationForm({ onSuccess, onCancel, className = ''
       </div>
 
       <div className="space-y-4">
-        <div className="flex items-center space-x-4 bg-gray-50 p-4 rounded-lg">
+        <h4 className="text-lg font-semibold text-gray-900 text-center mb-4">Choose Your Payment Method</h4>
+        
+        <div className="flex items-center space-x-4 bg-gray-50 p-4 rounded-lg border-2 border-gray-200 cursor-pointer hover:border-gray-300"
+             onClick={() => setUseCoins(false)}>
           <input
             type="radio"
             id="direct-amount"
@@ -152,15 +155,19 @@ export default function PledgeCreationForm({ onSuccess, onCancel, className = ''
             onChange={() => setUseCoins(false)}
             className="h-4 w-4 text-primary-600 border-gray-300 focus:ring-primary-500"
           />
-          <label htmlFor="direct-amount" className="text-sm font-medium text-gray-700">
-            Enter amount directly
-          </label>
+          <div className="flex-1">
+            <label htmlFor="direct-amount" className="text-sm font-medium text-gray-700 flex items-center cursor-pointer">
+              <div className="w-5 h-5 mr-2 text-primary-600">💳</div>
+              Bills / Digital Payment (Bank Transfer, E-wallet, etc.)
+            </label>
+            <p className="text-xs text-gray-500 mt-1">For those who prefer to donate using bills or digital payments</p>
+          </div>
         </div>
 
         {!useCoins && (
-          <div>
+          <div className="bg-blue-50 p-4 rounded-lg">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Pledge Amount
+              Donation Amount
             </label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">₱</span>
@@ -175,10 +182,14 @@ export default function PledgeCreationForm({ onSuccess, onCancel, className = ''
                 className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-lg"
               />
             </div>
+            <p className="text-xs text-gray-600 mt-2">
+              💡 <strong>Trust-based system:</strong> Whether coins or bills/digital - same impact points! We trust you to be honest.
+            </p>
           </div>
         )}
 
-        <div className="flex items-center space-x-4 bg-gray-50 p-4 rounded-lg">
+        <div className="flex items-center space-x-4 bg-gray-50 p-4 rounded-lg border-2 border-gray-200 cursor-pointer hover:border-gray-300"
+             onClick={() => setUseCoins(true)}>
           <input
             type="radio"
             id="count-coins"
@@ -187,9 +198,13 @@ export default function PledgeCreationForm({ onSuccess, onCancel, className = ''
             onChange={() => setUseCoins(true)}
             className="h-4 w-4 text-primary-600 border-gray-300 focus:ring-primary-500"
           />
-          <label htmlFor="count-coins" className="text-sm font-medium text-gray-700">
-            Count my loose coins
-          </label>
+          <div className="flex-1">
+            <label htmlFor="count-coins" className="text-sm font-medium text-gray-700 flex items-center cursor-pointer">
+              <Calculator className="h-5 w-5 mr-2 text-primary-600" />
+              Count My Loose Coins
+            </label>
+            <p className="text-xs text-gray-500 mt-1">For those who want to exchange spare coins at participating stores</p>
+          </div>
         </div>
 
         {useCoins && (

@@ -193,34 +193,64 @@ export default function PledgeFlow({ beneficiaries, onPledgeSuccess }: PledgeFlo
             Pledging to: <span className="font-semibold text-primary-600">{selectedBeneficiaryData?.name}</span>
           </p>
 
-          {/* Toggle between coin counting and custom amount */}
-          <div className="flex justify-center mb-6">
-            <div className="bg-gray-100 p-1 rounded-lg">
-              <button
+          {/* Payment Method Selection */}
+          <div className="max-w-md mx-auto mb-8">
+            <h4 className="text-lg font-semibold text-gray-900 mb-4 text-center">Choose Your Payment Method</h4>
+            
+            <div className="space-y-3">
+              <div 
                 onClick={() => setUseCustomAmount(false)}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  !useCustomAmount ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600 hover:text-gray-900'
+                className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
+                  !useCustomAmount ? 'border-primary-400 bg-primary-50' : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
-                <Calculator className="h-4 w-4 inline mr-2" />
-                Count Coins
-              </button>
-              <button
+                <div className="flex items-center">
+                  <input
+                    type="radio"
+                    checked={!useCustomAmount}
+                    onChange={() => setUseCustomAmount(false)}
+                    className="h-4 w-4 text-primary-600 border-gray-300 focus:ring-primary-500 mr-3"
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-center">
+                      <Calculator className="h-5 w-5 text-primary-600 mr-2" />
+                      <span className="font-medium text-gray-900">Loose Coins</span>
+                    </div>
+                    <p className="text-sm text-gray-600 mt-1">Count your spare coins and exchange them at participating stores</p>
+                  </div>
+                </div>
+              </div>
+
+              <div 
                 onClick={() => setUseCustomAmount(true)}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  useCustomAmount ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600 hover:text-gray-900'
+                className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
+                  useCustomAmount ? 'border-primary-400 bg-primary-50' : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
-                Custom Amount
-              </button>
+                <div className="flex items-center">
+                  <input
+                    type="radio"
+                    checked={useCustomAmount}
+                    onChange={() => setUseCustomAmount(true)}
+                    className="h-4 w-4 text-primary-600 border-gray-300 focus:ring-primary-500 mr-3"
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-center">
+                      <div className="w-5 h-5 mr-2 text-primary-600">💳</div>
+                      <span className="font-medium text-gray-900">Bills / Digital Payment</span>
+                    </div>
+                    <p className="text-sm text-gray-600 mt-1">Donate using bills, bank transfer, or e-wallet (GCash, PayMaya, etc.)</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
           {useCustomAmount ? (
-            // Custom Amount Input
+            // Bills / Digital Payment Amount Input
             <div className="max-w-sm mx-auto">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Enter Amount (₱)
+                Donation Amount (₱)
               </label>
               <input
                 type="number"
@@ -231,6 +261,9 @@ export default function PledgeFlow({ beneficiaries, onPledgeSuccess }: PledgeFlo
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 placeholder="0.00"
               />
+              <p className="text-xs text-gray-500 mt-2">
+                💡 <strong>Trust-based system:</strong> We rely on your honesty. Same social impact points whether coins or other payment methods.
+              </p>
             </div>
           ) : (
             // Coin Counting Grid
@@ -363,6 +396,9 @@ export default function PledgeFlow({ beneficiaries, onPledgeSuccess }: PledgeFlo
               <div className="flex justify-between">
                 <span className="text-gray-600">Impact Points:</span>
                 <span className="font-semibold text-primary-600">{Math.floor(totalAmount)} points</span>
+              </div>
+              <div className="text-xs text-gray-500 text-center mt-2 p-2 bg-blue-50 rounded">
+                ℹ️ All payment methods earn the same impact points: ₱1 = 1 point
               </div>
             </div>
           </div>
