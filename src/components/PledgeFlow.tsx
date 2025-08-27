@@ -128,7 +128,7 @@ export default function PledgeFlow({ beneficiaries, onPledgeSuccess }: PledgeFlo
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border p-6">
+    <div className="card p-8 max-w-4xl mx-auto">
       {/* Step Indicator */}
       {currentStep !== 'success' && (
         <div className="flex items-center justify-center mb-8">
@@ -157,7 +157,7 @@ export default function PledgeFlow({ beneficiaries, onPledgeSuccess }: PledgeFlo
       {/* Step 1: Select Beneficiary */}
       {currentStep === 'select-beneficiary' && (
         <div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-6 text-center">Choose a Beneficiary</h3>
+          <h3 className="headline-medium text-center text-foreground mb-8">Choose a Beneficiary</h3>
           <div className="grid gap-4 max-w-2xl mx-auto">
             {beneficiaries.map((beneficiary) => (
               <button
@@ -166,15 +166,15 @@ export default function PledgeFlow({ beneficiaries, onPledgeSuccess }: PledgeFlo
                   setSelectedBeneficiary(beneficiary.id);
                   setCurrentStep('count-coins');
                 }}
-                className="p-4 border-2 border-gray-200 hover:border-primary-400 rounded-lg text-left transition-colors"
+                className="card p-6 text-left transition-all duration-200 hover:scale-[1.02] focus-ring"
               >
                 <div className="flex items-center justify-between">
-                  <div>
-                    <h4 className="font-semibold text-gray-900">{beneficiary.name}</h4>
-                    <p className="text-sm text-gray-600 mt-1">{beneficiary.description}</p>
+                  <div className="flex-1">
+                    <h4 className="title-large text-foreground mb-2">{beneficiary.name}</h4>
+                    <p className="body-medium text-gray-600">{beneficiary.description}</p>
                   </div>
                   {beneficiary.verified && (
-                    <div className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                    <div className="bg-green-100 text-green-700 label-medium px-3 py-1 rounded-full ml-4">
                       ✓ Verified
                     </div>
                   )}
@@ -188,20 +188,20 @@ export default function PledgeFlow({ beneficiaries, onPledgeSuccess }: PledgeFlo
       {/* Step 2: Count Coins */}
       {currentStep === 'count-coins' && (
         <div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2 text-center">Count Your Coins</h3>
-          <p className="text-gray-600 text-center mb-6">
-            Pledging to: <span className="font-semibold text-primary-600">{selectedBeneficiaryData?.name}</span>
+          <h3 className="headline-medium text-center text-foreground mb-3">Count Your Coins</h3>
+          <p className="body-large text-gray-600 text-center mb-8">
+            Pledging to: <span className="font-medium text-primary-600">{selectedBeneficiaryData?.name}</span>
           </p>
 
           {/* Payment Method Selection */}
-          <div className="max-w-md mx-auto mb-8">
-            <h4 className="text-lg font-semibold text-gray-900 mb-4 text-center">Choose Your Payment Method</h4>
+          <div className="max-w-lg mx-auto mb-10">
+            <h4 className="title-large text-center text-foreground mb-6">Choose Your Payment Method</h4>
             
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div 
                 onClick={() => setUseCustomAmount(false)}
-                className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
-                  !useCustomAmount ? 'border-primary-400 bg-primary-50' : 'border-gray-200 hover:border-gray-300'
+                className={`card p-5 cursor-pointer transition-all duration-200 ${
+                  !useCustomAmount ? 'ring-2 ring-primary-600 bg-primary-50' : 'hover:bg-surface'
                 }`}
               >
                 <div className="flex items-center">
@@ -209,22 +209,22 @@ export default function PledgeFlow({ beneficiaries, onPledgeSuccess }: PledgeFlo
                     type="radio"
                     checked={!useCustomAmount}
                     onChange={() => setUseCustomAmount(false)}
-                    className="h-4 w-4 text-primary-600 border-gray-300 focus:ring-primary-500 mr-3"
+                    className="h-5 w-5 text-primary-600 border-gray-300 focus:ring-primary-600 mr-4 focus-ring"
                   />
                   <div className="flex-1">
-                    <div className="flex items-center">
-                      <Calculator className="h-5 w-5 text-primary-600 mr-2" />
-                      <span className="font-medium text-gray-900">Loose Coins</span>
+                    <div className="flex items-center mb-2">
+                      <Calculator className="h-5 w-5 text-primary-600 mr-3" />
+                      <span className="title-medium text-foreground">Loose Coins</span>
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">Count your spare coins and exchange them at participating stores</p>
+                    <p className="body-medium text-gray-600">Count your spare coins and exchange them at participating stores</p>
                   </div>
                 </div>
               </div>
 
               <div 
                 onClick={() => setUseCustomAmount(true)}
-                className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
-                  useCustomAmount ? 'border-primary-400 bg-primary-50' : 'border-gray-200 hover:border-gray-300'
+                className={`card p-5 cursor-pointer transition-all duration-200 ${
+                  useCustomAmount ? 'ring-2 ring-primary-600 bg-primary-50' : 'hover:bg-surface'
                 }`}
               >
                 <div className="flex items-center">
@@ -232,14 +232,14 @@ export default function PledgeFlow({ beneficiaries, onPledgeSuccess }: PledgeFlo
                     type="radio"
                     checked={useCustomAmount}
                     onChange={() => setUseCustomAmount(true)}
-                    className="h-4 w-4 text-primary-600 border-gray-300 focus:ring-primary-500 mr-3"
+                    className="h-5 w-5 text-primary-600 border-gray-300 focus:ring-primary-600 mr-4 focus-ring"
                   />
                   <div className="flex-1">
-                    <div className="flex items-center">
-                      <div className="w-5 h-5 mr-2 text-primary-600">💳</div>
-                      <span className="font-medium text-gray-900">Bills / Digital Payment</span>
+                    <div className="flex items-center mb-2">
+                      <div className="w-5 h-5 mr-3 flex items-center justify-center">💳</div>
+                      <span className="title-medium text-foreground">Bills / Digital Payment</span>
                     </div>
-                    <p className="text-sm text-gray-600 mt-1">Donate using bills, bank transfer, or e-wallet (GCash, PayMaya, etc.)</p>
+                    <p className="body-medium text-gray-600">Donate using bills, bank transfer, or e-wallet (GCash, PayMaya, etc.)</p>
                   </div>
                 </div>
               </div>
@@ -297,11 +297,11 @@ export default function PledgeFlow({ beneficiaries, onPledgeSuccess }: PledgeFlo
           </div>
 
           {/* Continue Button */}
-          <div className="mt-8 text-center">
+          <div className="mt-10 text-center">
             <button
               onClick={() => setCurrentStep('enter-username')}
               disabled={totalAmount <= 0}
-              className="bg-primary-600 hover:bg-primary-700 disabled:bg-gray-300 text-white px-8 py-3 rounded-lg font-medium transition-colors disabled:cursor-not-allowed"
+              className="btn-filled px-8 py-3 disabled:opacity-50 disabled:cursor-not-allowed focus-ring"
             >
               Continue
             </button>

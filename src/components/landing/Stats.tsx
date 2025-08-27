@@ -68,24 +68,24 @@ export default function Stats() {
   ];
 
   return (
-    <section className="py-16 px-4 bg-white">
+    <section className="py-20 px-6 bg-surface">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+        <h2 className="display-small text-center text-foreground mb-16">
           Our Impact So Far
         </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {statItems.map((stat, index) => (
-            <div key={index} className="text-center">
-              <div className={`inline-flex p-4 rounded-full ${stat.bg} mb-4`}>
+            <div key={index} className="text-center card p-8 hover:scale-105 transition-all duration-200">
+              <div className={`inline-flex p-4 rounded-full ${stat.bg} mb-6`}>
                 <stat.icon className={`h-8 w-8 ${stat.color}`} />
               </div>
               
-              <div className="text-4xl font-bold text-gray-900 mb-2">
+              <div className="display-medium text-foreground mb-3">
                 {stat.value}
               </div>
               
-              <div className="text-gray-600 font-medium">
+              <div className="title-medium text-gray-600">
                 {stat.label}
               </div>
             </div>

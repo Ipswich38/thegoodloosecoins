@@ -4,48 +4,57 @@ import Image from 'next/image';
 
 export default function Hero() {
   return (
-    <section id="hero" className="bg-gradient-to-br from-primary-50 via-white to-secondary-50 py-20 px-4">
-      <div className="max-w-4xl mx-auto text-center">
-        <div className="flex justify-center mb-8">
-          <div className="w-32 h-32">
+    <section id="hero" className="bg-white py-24 px-6">
+      <div className="max-w-5xl mx-auto text-center">
+        <div className="flex justify-center mb-12">
+          <div className="w-20 h-20 md:w-24 md:h-24">
             <Image 
-              src="/th good loose coins (3).png" 
+              src="/tglc_logo.svg" 
               alt="The Good Loose Coins Logo" 
-              width={128}
-              height={128}
+              width={96}
+              height={96}
               className="w-full h-full object-contain"
             />
           </div>
         </div>
         
-        <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
+        <h1 className="display-large md:display-large text-foreground mb-6 max-w-4xl mx-auto">
           The Good Loose Coins
         </h1>
         
-        <p className="text-2xl text-gray-600 mb-12 font-light">
-          Turn your spare change into <span className="font-semibold text-primary-600">social impact</span>
+        <p className="headline-small text-gray-600 mb-12 max-w-2xl mx-auto font-normal">
+          Turn your spare change into <span className="text-primary-600 font-medium">meaningful social impact</span>
         </p>
         
         <Link 
           href="/dashboard" 
-          className="bg-primary-600 hover:bg-primary-700 text-white font-medium py-4 px-10 rounded-xl transition-all transform hover:scale-105 inline-flex items-center text-lg shadow-lg hover:shadow-xl"
+          className="btn-filled text-white px-8 py-3 text-base rounded-3xl hover:shadow-lg transition-all duration-200 inline-flex items-center gap-2 focus-ring"
         >
           Start Making Impact
-          <ArrowRight className="h-6 w-6 ml-3" />
+          <ArrowRight className="h-5 w-5" />
         </Link>
         
-        <div className="mt-16 grid md:grid-cols-3 gap-8 max-w-3xl mx-auto">
-          <div className="text-center">
-            <div className="text-3xl font-bold text-primary-600 mb-2">Count</div>
-            <p className="text-gray-600">Your coins</p>
+        <div className="mt-20 grid md:grid-cols-3 gap-12 max-w-3xl mx-auto">
+          <div className="flex flex-col items-center">
+            <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mb-4">
+              <span className="text-2xl">🪙</span>
+            </div>
+            <div className="title-large text-primary-600 mb-2 font-medium">Count</div>
+            <p className="body-large text-gray-600">Your spare coins or set any amount</p>
           </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-primary-600 mb-2">Pledge</div>
-            <p className="text-gray-600">To beneficiaries</p>
+          <div className="flex flex-col items-center">
+            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+              <span className="text-2xl">🤝</span>
+            </div>
+            <div className="title-large text-primary-600 mb-2 font-medium">Pledge</div>
+            <p className="body-large text-gray-600">Support verified beneficiaries</p>
           </div>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-primary-600 mb-2">Impact</div>
-            <p className="text-gray-600">Lives changed</p>
+          <div className="flex flex-col items-center">
+            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
+              <span className="text-2xl">✨</span>
+            </div>
+            <div className="title-large text-primary-600 mb-2 font-medium">Impact</div>
+            <p className="body-large text-gray-600">Create positive change together</p>
           </div>
         </div>
       </div>
